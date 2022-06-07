@@ -146,69 +146,6 @@ class P2p(CreateTracker):
         return r.json()
 
 
-class Cities(models.Model):
-    name = models.CharField(max_length=32, **nb)
-    ru_name = models.CharField(max_length=32, **nb)
-
-    @classmethod
-    def get_dict(cls) -> Dict:
-        cities = list(cls.objects.all().values('id', 'ru_name'))
-        dict_cities = {}
-        for el in cities:
-            dict_cities[el['ru_name']] = el['id']
-        return dict_cities
-
-    @classmethod
-    def get_obj(cls) -> List:
-        cities = cls.objects.all().values('id', 'name', 'ru_name').order_by('ru_name')
-        return list(cities)
-
-
-class Pairs(models.Model):
-    pair = models.CharField(max_length=100, **nb)
-    ru_pair = models.CharField(max_length=100, **nb)
-    convert = models.CharField(max_length=32, **nb)
-
-    @classmethod
-    def get_dict(cls) -> Dict:
-        pairs = list(cls.objects.all().values('id', 'pair', 'ru_pair'))
-        dict_pairs = {}
-        for el in pairs:
-            dict_pairs[el['pair']] = el['ru_pair']
-        return dict_pairs
-
-    @classmethod
-    def get_convert_dict(cls) -> Dict:
-        pairs = list(cls.objects.all().values('id', 'pair', 'convert'))
-        dict_pairs = {}
-        for el in pairs:
-            dict_pairs[el['pair']] = el['convert']
-        return dict_pairs
-
-    @classmethod
-    def get_obj(cls) -> List:
-        pairs = cls.objects.all().values('id', 'pair', 'ru_pair').order_by('id')
-        return list(pairs)
-
-
-class Periods(models.Model):
-    period = models.CharField(max_length=100, **nb)
-    ru_period = models.CharField(max_length=100, **nb)
-
-    @classmethod
-    def get_dict(cls) -> Dict:
-        periods = list(cls.objects.all().values('id', 'period', 'ru_period'))
-        dict_periods = {}
-        for el in periods:
-            dict_periods[el['period']] = el['ru_period']
-        return dict_periods
-
-    @classmethod
-    def get_obj(cls) -> List:
-        periods = cls.objects.all().values('id', 'period', 'ru_period')
-        return list(periods)
-
-
 class Terms(models.Model):
     terms_of_use_user = models.TextField(blank=True, null=True)
     terms_of_use_merchant = models.TextField(blank=True, null=True)
@@ -244,28 +181,12 @@ class User(CreateUpdateTracker):
         max_length=8, help_text="Telegram client's lang", **nb)
     deep_link = models.CharField(max_length=64, **nb)
     state = models.CharField(max_length=32, default='0')
-    orders_client = models.CharField(max_length=32, default='None')
-    merchant_client = models.CharField(max_length=32, default='None')
-    merchant_status = models.CharField(max_length=32, default='pause')
-    city = models.CharField(max_length=32, **nb)
-    type_pair = models.CharField(max_length=32, **nb)
-    pair = models.CharField(max_length=32, **nb)
-    summ = models.FloatField(default=0)
-    period = models.CharField(max_length=32, **nb)
-    transfer = models.CharField(max_length=256, **nb)
-    merchant_delivery = models.CharField(
-        max_length=256, default='🛻 Доставка: Самовывозом')
     message_id = models.PositiveBigIntegerField(default=0)
-    count_client_order = models.PositiveBigIntegerField(default=0)
-    count_client_order_success = models.PositiveBigIntegerField(default=0)
-    count_merchant_order = models.PositiveBigIntegerField(default=0)
-    count_merchant_order_success = models.PositiveBigIntegerField(default=0)
     ref_id = models.PositiveBigIntegerField(default=0)
-
     is_blocked_bot = models.BooleanField(default=False)
-
+    is_banned = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-
+    is_moderator = models.BooleanField(default=False)
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
 
@@ -289,74 +210,6 @@ class User(CreateUpdateTracker):
                     u.save()
 
         return u, created
-
-    @classmethod
-    def get_user_state(cls, update: Update, context: CallbackContext) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        return u.state
-
-    @classmethod
-    def set_user_state(cls, update: Update, context: CallbackContext, state) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.state = state
-        u.save()
-        return
-
-    @classmethod
-    def set_period(cls, update: Update, context: CallbackContext, period) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.period = period
-        u.save()
-        return
-
-    @classmethod
-    def set_city(cls, update: Update, context: CallbackContext, city) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.city = city
-        u.save()
-        return
-
-    @classmethod
-    def set_type_pair(cls, update: Update, context: CallbackContext, type_pair) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.type_pair = type_pair
-        u.save()
-        return
-
-    @classmethod
-    def set_pair(cls, update: Update, context: CallbackContext, pair) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.pair = pair
-        u.save()
-        return
-
-    @classmethod
-    def set_summ(cls, update: Update, context: CallbackContext, summ) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.summ = summ
-        u.save()
-        return
-
-    @classmethod
-    def set_orders_client(cls, update: Update, context: CallbackContext, orders_client) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.orders_client = orders_client
-        u.save()
-        return
-
-    @classmethod
-    def set_merchant_client(cls, update: Update, context: CallbackContext, merchant_client) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.merchant_client = merchant_client
-        u.save()
-        return
-
-    @classmethod
-    def set_message_id(cls, update: Update, context: CallbackContext, message_id) -> str:
-        u, _ = cls.get_user_and_created(update, context)
-        u.message_id = message_id
-        u.save()
-        return
 
     @classmethod
     def get_user(cls, update: Update, context: CallbackContext) -> User:
@@ -396,57 +249,6 @@ class Invoice (models.Model):
         r = requests.get(url, headers=headers)
         print(f"status code = {r.status_code}")
         return r.json()
-
-
-class Order(CreateUpdateTracker):
-    client_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='client_id_order_set')
-    city = models.CharField(max_length=32, **nb)
-    pair = models.CharField(max_length=32, **nb)
-    summ = models.FloatField(default=0)
-    period = models.CharField(max_length=32, **nb)
-    transfer = models.CharField(max_length=256, **nb)
-    timestamp_execut = models.PositiveBigIntegerField()
-    date_time_execut = models.DateTimeField(null=False, auto_now=False)
-    merchant_executor_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='merchant_executor_id_order_set', **nb)
-    order_fee = models.FloatField(default=0)
-    status = models.CharField(max_length=32, **nb)
-    status_fee = models.CharField(max_length=32, default='not_paid')
-
-    @classmethod
-    def get_obj(cls) -> List:
-        pairs = cls.objects.all()
-        return list(pairs)
-
-
-class Suggestion(CreateUpdateTracker):
-    order_id = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name='order_id_suggestion_set')
-    merchant_executor_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='merchant_executor_id_suggestion_set', **nb)
-    summ = models.FloatField(default=0)
-
-
-class Rating(CreateUpdateTracker):
-    who_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='who_id_rating_set')
-    whom_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='whom_id_rating_set')
-    rank = models.IntegerField(blank=False, null=True)
-    comment = models.TextField(**nb)
-
-
-class MerchantsCities(models.Model):
-    merchant_id = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='merchant_id_cities_set', **nb)
-    city_id = models.ForeignKey(
-        Cities, on_delete=models.CASCADE, related_name='city_merchant_ids_set', **nb)
-
-    @classmethod
-    def get_obj(cls) -> List:
-        cities = cls.objects.all().values('id', 'merchant_id', 'city_id')
-        return list(cities)
 
 
 class Location(CreateTracker):
