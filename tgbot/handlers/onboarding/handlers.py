@@ -12,7 +12,7 @@ from telegram.ext import CallbackContext
 from tgbot.handlers.onboarding import static_text, static_state
 from tgbot.handlers.utils.info import extract_user_data_from_update
 from tgbot.models import User, P2p
-from tgbot.handlers.onboarding.keyboards import make_keyboard_for_start_command
+from tgbot.handlers.onboarding.keyboards import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from tgbot.tasks import broadcast_message
 from dtb.settings import BINANCE_API, BINANCE_SECRET
@@ -21,10 +21,10 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 
 
 def message_handler_func(update: Update, context: CallbackContext):
-    state = User.get_user_state(update, context)
+    u = User.get_user(update, context)
     if update.message.chat.id != -1001717597940:
-        if state in State_Dict:
-            func_menu = State_Dict[state]
+        if u.state in State_Dict:
+            func_menu = State_Dict[u.state]
             func_menu(update, context)
         elif update.message.text in Menu_Dict:  # button_message проверяем текст на соответствие любой кнопке
             func_menu = Menu_Dict[update.message.text]
@@ -127,13 +127,11 @@ def isfloat(num):
 def check_username(update: Update, context: CallbackContext, text='\n'):
     message = get_message_bot(update)
     if not hasattr(message.chat, 'username') or message.chat.username == '' or message.chat.username == None:
-        btn_menu = InlineKeyboardButton(text='🎉 Старт', callback_data='Старт')
-        markup = InlineKeyboardMarkup([
-            [btn_menu]
-        ])
+        u = User.get_user(update, context)
         id = context.bot.send_message(message.chat.id, static_text.NOT_USER_NAME.format(
-            text=text, tgid=message.chat.id), reply_markup=markup)  # отправляет приветствие и кнопку
-        User.set_message_id(update, context, id.message_id)
+            text=text, tgid=message.chat.id), reply_markup=make_keyboard_for_check_username())  # отправляет приветствие и кнопку
+        u.message_id = id.message_id
+        u.save()
         return False
     return True
 
@@ -153,13 +151,9 @@ def command_start(update: Update, context: CallbackContext):
     text = "\n"
     # Если пользователь без username мы предлагаем ему заполнить свой профиль.
     if check_username(update, context, text):
-        btn_menu = InlineKeyboardButton(text='📋 Меню', callback_data='Меню')
-        markup = InlineKeyboardMarkup([
-            [btn_menu]
-        ])
         # print(bot.get_chat_member(352482305))
         id = context.bot.send_message(message.chat.id, static_text.START_USER.format(
-            username=u.username,text=text, tgid=message.chat.id), reply_markup=markup, parse_mode="HTML")  # отправляет приветствие и кнопку
+            username=u.username,text=text, tgid=message.chat.id), reply_markup=make_keyboard_for_start(), parse_mode="HTML")  # отправляет приветствие и кнопку
         u.message_id = id.message_id
         u.save()
     del_mes(update, context, True)
@@ -181,26 +175,8 @@ def cmd_menu(update: Update, context: CallbackContext):
         message = get_message_bot(update)
         # помечаем состояние пользователя.
         u.state = static_state.S_MENU
-        buttons = []
-        btn_help = InlineKeyboardButton(text='🆘 Помощь', callback_data='Help')
-        btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
-        btn_vc = InlineKeyboardButton(
-            text='👨‍👧‍👦🧍‍♂️ Kostevich VC', callback_data='Help')
-        btn_selected = InlineKeyboardButton(
-            text='🏵💸 Kostevich Selected', callback_data='Help')
-        btn_academy = InlineKeyboardButton(
-            text='🧮📝 Kostevich Academy', callback_data='Help')
-        buttons.append([btn_vc,btn_selected])
-        buttons.append([btn_academy])
-        
-        if u.is_admin:
-            btn_admin = InlineKeyboardButton(
-                text='📝 Администрирование', callback_data="Администрирование")
-            buttons.append([btn_admin])
-        buttons.append([btn_help, btn_back])
-        markup = InlineKeyboardMarkup(buttons)
         id = context.bot.send_message(
-            message.chat.id, static_text.MENU, reply_markup=markup, parse_mode="HTML")
+            message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin), parse_mode="HTML")
         u.message_id = id.message_id
         u.save()
     del_mes(update, context, True)
@@ -211,37 +187,24 @@ def cmd_menu(update: Update, context: CallbackContext):
 def cmd_help(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
-    buttons = []
-    btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
-    btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
-    buttons.append([btn_main, btn_back])
-    markup = InlineKeyboardMarkup(buttons)
+
     id = context.bot.send_message(
-        message.chat.id,
-        """<b>ПОМОЩЬ</b>
-        
-        """,
-        reply_markup=markup, parse_mode="HTML", disable_web_page_preview=True)
+        message.chat.id, static_text.HELP,
+        reply_markup=make_keyboard_for_cmd_help(), parse_mode="HTML", disable_web_page_preview=True)
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)
 
 
 def cmd_admin(update: Update, context: CallbackContext):
-    del_mes(update, context, True)
     u = User.get_user(update, context)
     if u.is_admin:
         message = get_message_bot(update)
-        buttons = []
-        btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
-        btn_main = InlineKeyboardButton(
-            text='⏮ В начало', callback_data='Старт')
-        buttons.append([btn_main, btn_back])
-        markup = InlineKeyboardMarkup(buttons)
-        id = context.bot.send_message(message.chat.id, "📝 Администрирование:\nвыбери необходимый пункт для дальнейших действий\n\n<code>{}</code>".format(
-            P2p.pay_trade_history()), reply_markup=markup, parse_mode="HTML")
+        id = context.bot.send_message(message.chat.id, static_text.ADMIN_MENU_TEXT.format(
+            P2p.pay_trade_history()), reply_markup=make_keyboard_for_cmd_admin(), parse_mode="HTML")
         u.message_id = id.message_id
         u.save()
+        del_mes(update, context, True)
     else:
         command_start(update, context)
 
