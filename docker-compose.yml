@@ -12,12 +12,9 @@ services:
       - ./dtb/media:/media
     ports:
       - "8000:8000"
-    environment:
-      - VIRTUAL_HOST=domain.com
-      - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=domain.com
     env_file:
       - ./.env
+      - ./.env_web
     depends_on:
       - db
   # bot: #for run localhost and long pooling
@@ -34,11 +31,9 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
     env_file:
       - ./.env
+      - ./.env_db
     ports:
       - "5433:5432"
   redis:
@@ -64,10 +59,8 @@ services:
       - web
   nginx-proxy-letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
-    environment:
-      - DEFAULT_EMAIL=yourmail@gmail.com
-      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory #to test proxy letsencrypt, comment on prod this string
-      - NGINX_PROXY_CONTAINER=nginx-proxy
+    env_file:
+      - ./.env_letsencrypt
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
