@@ -1,0 +1,10 @@
+location /static/ {
+  autoindex on;
+  alias /static/;
+  add_header Access-Control-Allow-Origin *;
+}
+
+location /media/ {
+  alias /media/;
+  add_header Access-Control-Allow-Origin *;
+}

@@ -1,0 +1,109 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: dtb_django
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    volumes:
+      - .:/code
+      - ./dtb/static:/static
+      - ./dtb/media:/media
+    ports:
+      - "8000:8000"
+    environment:
+      - VIRTUAL_HOST=domain.com
+      - VIRTUAL_PORT=8000
+      - LETSENCRYPT_HOST=domain.com
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+  # bot: #for run localhost and long pooling
+  #   build: .
+  #   container_name: dtb_bot
+  #   command: python run_pooling.py
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - web
+  db:
+    image: postgres:12
+    container_name: dtb_postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./.env
+    ports:
+      - "5433:5432"
+  redis:
+    image: redis:alpine
+    container_name: dtb_redis
+    restart: always
+  nginx-proxy:
+    container_name: nginx-proxy
+    build: nginx
+    restart: always
+    tty: true
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ./dtb/static:/static
+      - ./dtb/media:/media
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    depends_on:
+      - web
+  nginx-proxy-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    environment:
+      - DEFAULT_EMAIL=yourmail@gmail.com
+      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory #to test proxy letsencrypt, comment on prod this string
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - acme:/etc/acme.sh
+    depends_on:
+      - nginx-proxy
+  celery:
+    build: .
+    container_name: dtb_celery
+    command: celery -A dtb worker --loglevel=INFO
+    volumes:
+      - .:/code
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - web
+    restart: always
+  celery-beat:
+    build: .
+    container_name: dtb_beat
+    command: celery -A dtb beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler
+    volumes:
+      - .:/code
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - celery
+      - web
+
+volumes:
+  postgres_data:
+  certs:
+  html:
+  vhost:
+  acme:
