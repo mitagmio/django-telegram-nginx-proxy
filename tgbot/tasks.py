@@ -8,7 +8,7 @@ from typing import Union, List, Optional, Dict
 
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from tgbot.models import P2p, Order, Suggestion, Cities, User, Pairs, Periods, Terms, Invoice
+from tgbot.models import P2p, User, Terms, Invoice
 
 from dtb.celery import app
 from celery.utils.log import get_task_logger

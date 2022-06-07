@@ -11,7 +11,7 @@ from telegram.ext import CallbackContext
 
 from tgbot.handlers.onboarding import static_text, static_state
 from tgbot.handlers.utils.info import extract_user_data_from_update
-from tgbot.models import User, Cities, Pairs, Periods, Terms, Order, Suggestion, P2p, MerchantsCities, Invoice, Rating
+from tgbot.models import User, P2p
 from tgbot.handlers.onboarding.keyboards import make_keyboard_for_start_command
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from tgbot.tasks import broadcast_message
@@ -160,7 +160,8 @@ def command_start(update: Update, context: CallbackContext):
         # print(bot.get_chat_member(352482305))
         id = context.bot.send_message(message.chat.id, static_text.START_USER.format(
             username=u.username,text=text, tgid=message.chat.id), reply_markup=markup, parse_mode="HTML")  # отправляет приветствие и кнопку
-        User.set_message_id(update, context, id.message_id)
+        u.message_id = id.message_id
+        u.save()
     del_mes(update, context, True)
 
     # if created:
@@ -176,9 +177,10 @@ def command_start(update: Update, context: CallbackContext):
 
 def cmd_menu(update: Update, context: CallbackContext):
     if check_username(update, context):
+        u = User.get_user(update, context)
         message = get_message_bot(update)
         # помечаем состояние пользователя.
-        User.set_user_state(update, context, static_state.S_MENU)
+        u.state = static_state.S_MENU
         buttons = []
         btn_help = InlineKeyboardButton(text='🆘 Помощь', callback_data='Help')
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
@@ -188,128 +190,27 @@ def cmd_menu(update: Update, context: CallbackContext):
             text='🏵💸 Kostevich Selected', callback_data='Help')
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', callback_data='Help')
-        buttons.append(btn_vc)
-        buttons.append(btn_selected)
-        buttons.append(btn_academy)
-        u = User.get_user(update, context)
+        buttons.append([btn_vc,btn_selected])
+        buttons.append([btn_academy])
+        
         if u.is_admin:
             btn_admin = InlineKeyboardButton(
                 text='📝 Администрирование', callback_data="Администрирование")
             buttons.append([btn_admin])
-        buttons.append([btn_help])
-        buttons.append([btn_back])
+        buttons.append([btn_help, btn_back])
         markup = InlineKeyboardMarkup(buttons)
         id = context.bot.send_message(
             message.chat.id, static_text.MENU, reply_markup=markup, parse_mode="HTML")
-        User.set_message_id(update, context, id.message_id)
+        u.message_id = id.message_id
+        u.save()
     del_mes(update, context, True)
-
-# Меню клиента ## user_story
-
-
-def start_client(update: Update, context: CallbackContext):
-    u = User.get_user(update, context)
-    if check_username(update, context):
-        if u.orders_client == 'None':
-            cmd_client(update, context)
-            return
-        message = get_message_bot(update)
-        # помечаем состояние пользователя.
-        User.set_user_state(update, context, static_state.S_MENU)
-        buttons = []
-        btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
-        btn_client = InlineKeyboardButton(
-            text='💸 Новый заказ', callback_data='Клиент')
-        btn_shop = InlineKeyboardButton(
-            text='📝 Мои заказы', callback_data='Заказы_Клиент')
-        buttons.append([btn_client, btn_shop])
-        buttons.append([btn_back])
-        markup = InlineKeyboardMarkup(buttons)
-        id = context.bot.send_message(
-            message.chat.id, "Выбери нужный пункт:", reply_markup=markup, parse_mode="HTML")
-        User.set_message_id(update, context, id.message_id)
-    del_mes(update, context, True)
-
-# новый заказ "Клиент" - Город
-
-
-def cmd_client(update: Update, context: CallbackContext):
-    message = get_message_bot(update)
-    User.set_orders_client(update, context, "yes")
-    # помечаем состояние пользователя.
-    User.set_user_state(update, context, static_state.S_MENU)
-    buttons = []
-    btn_back = InlineKeyboardButton(
-        text='⏪ Назад', callback_data='Меню_Клиент')
-    cities = Cities.get_obj()
-    if len(cities) >= 1:  # Проверяем есть ли в списке города
-        count = 0
-        # перебираем весь список если четное количество, то пишем по 2 в ряд.
-        for element in cities:
-            count += 1
-            merchants_id = list(MerchantsCities.objects.filter(
-                city_id=element['id']).values_list('merchant_id', flat=True))
-            merchants = len(list(User.objects.filter(
-                user_id__in=merchants_id, merchant_status='online')))
-            # если последний элемент не четный помещаем в одну строку
-            if len(cities) == count and len(cities) % 2 != 0:
-                city = InlineKeyboardButton(
-                    element['ru_name']+'    '+str(merchants), callback_data='Город '+element['ru_name'])
-                buttons.append([city])
-                break
-            if count % 2 != 0:
-                city_a = InlineKeyboardButton(
-                    element['ru_name']+'    '+str(merchants), callback_data='Город '+element['ru_name'])
-            else:
-                city_b = InlineKeyboardButton(
-                    element['ru_name']+'    '+str(merchants), callback_data='Город '+element['ru_name'])
-                buttons.append([city_a, city_b])
-    buttons.append([btn_back])
-    markup = InlineKeyboardMarkup(buttons)
-    id = context.bot.send_message(
-        message.chat.id, "<b>Рядом с городом отображается число обменников онлайн, которые получат Вашу заявку и смогут предложить лучшую сделку.\n\nВЫБЕРИ ГОРОД, В КОТОРОМ ХОЧЕШЬ ПРОИЗВЕСТИ ОБМЕН:</b>", reply_markup=markup, parse_mode="HTML")
-    User.set_message_id(update, context, id.message_id)
-    del_mes(update, context, True)
-
-# Выбран город и выводим меню выбора пары обмена
-# Сюда попадаем через колбек с передачей параметра город
-# Выбираем направление обмена, тип пары
-
-
-def cmd_type_pair(update: Update, context: CallbackContext, city: Str = 'None'):
-    message = get_message_bot(update)
-    if city == 'None':
-        cmd_client(update, context)
-        return
-    del_mes(update, context, True)
-    # записываем город в словарь пользователя, потом заберем и очистим поле.
-    User.set_city(update, context, city)
-    # помечаем состояние пользователя.
-    User.set_user_state(update, context, static_state.S_MENU)
-    buttons = []
-    btn_back = InlineKeyboardButton(
-        text='⏪ Назад', callback_data='Меню_Клиент')
-    pair_a = InlineKeyboardButton(
-        '🇺🇸 USD (наличка)', callback_data='ТИП_Пары '+'USD')
-    pair_b = InlineKeyboardButton(
-        '🇱🇰 LKR (наличка)', callback_data='ТИП_Пары '+'LKR')
-    buttons.append([pair_a, pair_b])
-    buttons.append([btn_back])
-    markup = InlineKeyboardMarkup(buttons)
-    id = context.bot.send_message(
-        message.chat.id, "Черновик заказа на обмен\n\nВыбран город <code>{}</code>\n\n<b>ВЫБЕРИ ВАЛЮТУ ДЛЯ ПОЛУЧЕНИЯ:</b>\n\n".format(city), reply_markup=markup, parse_mode="HTML")
-    User.set_message_id(update, context, id.message_id)
-
-# Выбран тип пары
-# Сюда попадаем через колбек с передачей параметра тип пары
-# Выбираем направление обмена
-
 
 
 ###################################
 ###################################
 def cmd_help(update: Update, context: CallbackContext):
     del_mes(update, context, True)
+    u = User.get_user(update, context)
     message = get_message_bot(update)
     buttons = []
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
@@ -322,7 +223,8 @@ def cmd_help(update: Update, context: CallbackContext):
         
         """,
         reply_markup=markup, parse_mode="HTML", disable_web_page_preview=True)
-    User.set_message_id(update, context, id.message_id)
+    u.message_id = id.message_id
+    u.save()
 
 
 def cmd_admin(update: Update, context: CallbackContext):
@@ -338,7 +240,8 @@ def cmd_admin(update: Update, context: CallbackContext):
         markup = InlineKeyboardMarkup(buttons)
         id = context.bot.send_message(message.chat.id, "📝 Администрирование:\nвыбери необходимый пункт для дальнейших действий\n\n<code>{}</code>".format(
             P2p.pay_trade_history()), reply_markup=markup, parse_mode="HTML")
-        User.set_message_id(update, context, id.message_id)
+        u.message_id = id.message_id
+        u.save()
     else:
         command_start(update, context)
 
@@ -358,9 +261,6 @@ Menu_Dict = {
     'Старт': command_start,
     'Меню': cmd_menu,
     'Администрирование': cmd_admin,
-    'Меню_Клиент': start_client,
-    'Клиент': cmd_client,
-    'Город': cmd_type_pair,
     'pass': cmd_pass,
     'Help': cmd_help,
 }
