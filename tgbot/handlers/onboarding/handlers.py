@@ -209,7 +209,6 @@ def cmd_menu(update: Update, context: CallbackContext):
 ###################################
 ###################################
 def cmd_help(update: Update, context: CallbackContext):
-    del_mes(update, context, True)
     u = User.get_user(update, context)
     message = get_message_bot(update)
     buttons = []
@@ -225,6 +224,7 @@ def cmd_help(update: Update, context: CallbackContext):
         reply_markup=markup, parse_mode="HTML", disable_web_page_preview=True)
     u.message_id = id.message_id
     u.save()
+    del_mes(update, context, True)
 
 
 def cmd_admin(update: Update, context: CallbackContext):
