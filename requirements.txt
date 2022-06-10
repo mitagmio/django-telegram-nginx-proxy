@@ -8,6 +8,7 @@ django
 django-timezone-field 
 django-cors-headers
 django-debug-toolbar
+django-redis
 whitenoise
 
 # Django 3.0 async requirements

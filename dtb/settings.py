@@ -187,3 +187,13 @@ BINANCE_SECRET = os.getenv("BINANCE_SECRET", default=None)
 #     send_default_pii=True
 # )
 
+# -----> Redis CACHES
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
