@@ -183,6 +183,7 @@ class User(CreateUpdateTracker):
     state = models.CharField(max_length=32, default='0')
     message_id = models.PositiveBigIntegerField(default=0)
     ref_id = models.PositiveBigIntegerField(default=0)
+    balance = models.PositiveBigIntegerField(default=0)
     is_blocked_bot = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -242,7 +243,7 @@ class Invoice (models.Model):
 
     @staticmethod
     def get_payment(min_timestamp: int) -> Dict:
-        url = "https://api.trongrid.io/v1/accounts/TXBXgpaM5jCXVq45m8UNTuJaA4oJkSUQbY/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
+        url = "https://api.trongrid.io/v1/accounts/TYXmiSD7KoLmFyWoPauM2MpXfpS3Z1fsCq/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
             min_timestamp)
         headers = CaseInsensitiveDict()
         headers["Content-type"] = "application/json"
