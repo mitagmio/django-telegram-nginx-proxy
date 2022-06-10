@@ -166,16 +166,20 @@ def set_up_commands(bot_instance: Bot) -> None:
 # Likely, you'll get a flood limit control error, when restarting bot too often
 #set_up_commands(bot)
 
-# bot.delete_my_commands(language_code='ru')
-# bot.delete_my_commands(language_code='en')
-# bot.delete_my_commands(language_code='es')
-# bot.delete_my_commands(language_code='fr')
-# bot.delete_my_commands()
+if TELEGRAM_WEBHOOK_URL == None:
+    bot.delete_webhook()
+else:
+    url = "%s%s" % (TELEGRAM_WEBHOOK_URL,TELEGRAM_WEBHOOK_SECRET)
 
-#bot.delete_webhook()
-#url = "%s%s" % (TELEGRAM_WEBHOOK_URL,TELEGRAM_WEBHOOK_SECRET)
-#print(url)
-#bot.set_webhook(url)
+    if bot.get_webhook_info().url != url:
+        bot.delete_my_commands(language_code='ru')
+        bot.delete_my_commands(language_code='en')
+        bot.delete_my_commands(language_code='es')
+        bot.delete_my_commands(language_code='fr')
+        bot.delete_my_commands()
+
+        bot.delete_webhook()
+        bot.set_webhook(url)
 
 n_workers = 0 if DEBUG else 4
 dispatcher = setup_dispatcher(Dispatcher(bot, update_queue=None, workers=n_workers, use_context=True))
