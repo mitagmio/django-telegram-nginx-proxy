@@ -13,9 +13,16 @@ def make_keyboard_for_start_command() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(buttons)
 
 def make_keyboard_for_start() -> InlineKeyboardMarkup:
-    buttons = [[
-        InlineKeyboardButton(text='📋 Меню', callback_data='Меню')
-    ]]
+    buttons = [
+        [
+            InlineKeyboardButton(text='💃📋 Проекты E. Kostevich', callback_data='Меню'),
+            InlineKeyboardButton(text='💰💰 Кошелек', callback_data='Help')
+        ],
+        [
+            InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot"),
+            InlineKeyboardButton(text='👭👬💃 Рефералка', callback_data='Help')
+        ]
+    ]
 
     return InlineKeyboardMarkup(buttons)
 
@@ -27,7 +34,7 @@ def make_keyboard_for_check_username() -> InlineKeyboardMarkup:
 
 def make_keyboard_for_cmd_menu(adm) -> InlineKeyboardMarkup:
         buttons = []
-        btn_help = InlineKeyboardButton(text='🆘 Помощь', callback_data='Help')
+        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich VC', callback_data='Help')
