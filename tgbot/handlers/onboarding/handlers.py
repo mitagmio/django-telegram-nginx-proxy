@@ -1,17 +1,14 @@
-from ast import Pass, Str
-from ctypes import Union
 import datetime
-from email.policy import default
 import time
-from turtle import update
 
 from django.utils import timezone
 from telegram import Bot, ParseMode, Update
 from telegram.ext import CallbackContext
+from traitlets import Float
 
 from tgbot.handlers.onboarding import static_text, static_state
 from tgbot.handlers.utils.info import extract_user_data_from_update
-from tgbot.models import User, P2p
+from tgbot.models import User, P2p, Invoice, Tarif, Сourse
 from tgbot.handlers.onboarding.keyboards import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from tgbot.tasks import broadcast_message
@@ -22,6 +19,7 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 
 def message_handler_func(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
+    print(update)
     if update.message.chat.id != -1001717597940:
         if u.state in State_Dict:
             func_menu = State_Dict[u.state]
@@ -36,7 +34,7 @@ def message_handler_func(update: Update, context: CallbackContext):
 def callback_inline(update: Update, context: CallbackContext):
     # Если сообщение из чата с ботом
     # print('callback_inline', update)
-    call_list = ['Город',
+    call_list = ['Курс','Тариф'
                  ]
     call = update.callback_query
     if call.message:
@@ -135,7 +133,33 @@ def check_username(update: Update, context: CallbackContext, text='\n'):
         return False
     return True
 
+# Проверка на email
 
+
+def check_email(update: Update, context: CallbackContext, text='\n'):
+    message = get_message_bot(update)
+    u, _ = User.get_user_and_created(update, context)
+    if u.email == '' or u.email == None:
+        u = User.get_user(update, context)
+        u.state = static_state.S_EMAIL
+        id = context.bot.send_message(message.chat.id, static_text.NOT_EMAIL_NAME.format(
+            text=text, tgid=message.chat.id), reply_markup=make_keyboard_for_check_username())  # отправляет приветствие и кнопку
+        u.message_id = id.message_id
+        u.save()
+        return False
+    return True
+
+def s_email(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    email = message.text
+    try:
+        u.email = email
+        u.save()
+    except:
+        del_mes(update, context, True)
+        return check_email(update, context)
+    command_start(update, context)
 # Начало диалога
 
 
@@ -145,9 +169,10 @@ def command_start(update: Update, context: CallbackContext):
     # if u.state == static_state.S_ACCEPTED_ORDER:
     #     cmd_accepted_order_show(update, context)
     #     return
-    # if u.state == static_state.S_ACCEPTED_EXCHANGE:
-    #     cmd_accepted_exchange_show(update, context)
-    #     return
+    if u.state == static_state.S_EMAIL:
+        check_email(update, context)
+        del_mes(update, context, True)
+        return
     text = "\n"
     # Если пользователь без username мы предлагаем ему заполнить свой профиль.
     if check_username(update, context, text):
@@ -181,6 +206,143 @@ def cmd_menu(update: Update, context: CallbackContext):
         u.save()
     del_mes(update, context, True)
 
+
+# Кошелек
+
+def cmd_wallet(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    # помечаем состояние пользователя.
+    u.state = static_state.S_MENU
+    id = context.bot.send_message(
+        message.chat.id, static_text.WALLET.format(balance=u.balance), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+# Кнопка пополнения USDT TRC20 
+
+def cmd_top_up_wallet_usdt(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    if check_email(update, context):
+        # помечаем состояние пользователя.
+        u.state = static_state.S_TOP_UP_WALLET_USDT
+        invoice = Invoice.objects.filter(payer_id=u)
+        if len(invoice) > 0:
+            return s_top_up_wallet_usdt(update, context, invoice[0].summ_invoice)
+        id = context.bot.send_message(
+            message.chat.id, static_text.WALLET_SUMM, reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
+    del_mes(update, context, True)
+
+# Показываем счет на оплату
+
+def s_top_up_wallet_usdt(update: Update, context: CallbackContext, summ: float = 0.0):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    if summ == 0.0:
+        summ = message.text
+        if isfloat(summ) and float(summ) > 0:
+            summ = float(summ)
+            while len(Invoice.objects.filter(summ_invoice=summ)) > 0:
+                    summ += 0.01
+                    time.sleep(0.1)
+            Invoice.objects.create(summ_invoice=summ, payer_id=u)
+            # помечаем состояние пользователя.
+            u.state = static_state.S_MENU
+        else:
+            return cmd_top_up_wallet_usdt(update, context)
+    id = context.bot.send_message(
+        message.chat.id, static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+# Удаляем выставленный счет
+def cmd_del_invoice_trc20(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    invoice = Invoice.objects.get(payer_id=u)
+    invoice.delete() 
+    cmd_wallet(update, context)
+
+
+
+##### Академия
+def cmd_academy(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    try:
+        Сourses = Сourse.objects.all()
+        text = ''
+        for c in Сourses:
+            text += "<u>{title}</u> - {teaser}\n\n".format(title=c.title, teaser=c.teaser)
+        reply_markup = make_keyboard_for_cmd_academy(Сourses.values())
+    except:
+        reply_markup = make_keyboard_for_cmd_help()
+        text = "Курсов пока нет 😇"
+    id = context.bot.send_message(
+        message.chat.id, static_text.ACADEMY.format(text=text),
+        reply_markup=reply_markup, parse_mode="HTML", disable_web_page_preview=True)
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+def cmd_academy_course(update: Update, context: CallbackContext, course_id: int):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    # try:
+    cource = Сourse.objects.get(id=course_id)
+    tarifs = Сourse.objects.get(id=course_id).сourse_tarifs_set.all()
+    text = 'Тарифы:\n\n'
+    for t in tarifs:
+        text += t.__dict__['description']+'\n\n'
+    reply_markup = make_keyboard_for_academy_course(tarifs.values())
+    # except:
+    #     reply_markup = make_keyboard_for_academy_course()
+    #     text = "Тарифов пока нет 😇"
+    id = context.bot.send_message(
+        message.chat.id,  text + cource.description,
+        reply_markup=reply_markup, parse_mode="HTML")
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+def buy_tarif(update: Update, context: CallbackContext, tarif_id: int):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+
+    if check_email(update, context):
+        t = Tarif.objects.get(id=tarif_id)
+        if u.balance >= t.coast:
+            text = static_text.BUY_COURSE.format(email=u.email)
+            params = '{"user":{"email":"'+u.email+'"},"system":{"refresh_if_exists":1},"deal":{"offer_code":"'+str(t.offer_code)+'","deal_status":"new","deal_cost":"'+str(t.coast)+'","deal_is_paid":"1","payment_status":"accepted","payment_type":"CASH","deal_currency":"USD"}}'
+            print(Tarif.buy_tarif(params))
+            reply_markup = make_keyboard_for_cmd_help()
+            u.balance -= t.coast
+            u.save()
+        else:
+            text = static_text.NOT_BUY_COURSE.format(difference=t.coast-u.balance, balance=u.balance)
+            reply_markup = make_keyboard_for_no_money()
+        id = context.bot.send_message(
+                message.chat.id, text,
+                reply_markup=reply_markup, parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
+    del_mes(update, context, True)
+
+# Venture
+def cmd_venture(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+
+    id = context.bot.send_message(
+        message.chat.id, static_text.VENTURE,
+        reply_markup=make_keyboard_for_cmd_venture(), parse_mode="HTML", disable_web_page_preview=True)
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
 
 ###################################
 ###################################
@@ -217,12 +379,21 @@ def cmd_pass():
 State_Dict = {
     # Когда выбрано Меню, мы можем только нажимать кнопки. Любой текст удаляется
     static_state.S_MENU: del_mes,
+    static_state.S_TOP_UP_WALLET_USDT: s_top_up_wallet_usdt,
+    static_state.S_EMAIL: s_email,
 }
 
 # словарь функций Меню
 Menu_Dict = {
     'Старт': command_start,
     'Меню': cmd_menu,
+    'Кошелек': cmd_wallet,
+    'Пополнить_Кошелек_TRC20':cmd_top_up_wallet_usdt,
+    'Удалить_invoice':cmd_del_invoice_trc20,
+    'Академия': cmd_academy,
+    'Курс': cmd_academy_course,
+    'Тариф': buy_tarif,
+    'Венчур': cmd_venture,
     'Администрирование': cmd_admin,
     'pass': cmd_pass,
     'Help': cmd_help,

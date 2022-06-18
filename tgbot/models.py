@@ -4,6 +4,7 @@ from typing import List, Union, Optional, Tuple, Dict
 import hmac
 import time
 import hashlib
+import base64
 import requests
 from requests.structures import CaseInsensitiveDict
 from urllib.parse import urlencode
@@ -183,11 +184,12 @@ class User(CreateUpdateTracker):
     state = models.CharField(max_length=32, default='0')
     message_id = models.PositiveBigIntegerField(default=0)
     ref_id = models.PositiveBigIntegerField(default=0)
-    balance = models.PositiveBigIntegerField(default=0)
+    balance = models.FloatField(default=0)
     is_blocked_bot = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
+    email = models.CharField(max_length=256, **nb)
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
 
@@ -235,6 +237,36 @@ class User(CreateUpdateTracker):
             return f'@{self.username}'
         return f"{self.first_name} {self.last_name}" if self.last_name else f"{self.first_name}"
 
+class Сourse (models.Model):
+    title = models.CharField(max_length=256)
+    teaser = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    button_name = models.CharField(max_length=256)
+    callback_text = models.CharField(max_length=256)
+
+class Tarif (models.Model):
+    num_offer = models.CharField(max_length=256)
+    offer_code = models.CharField(max_length=256)
+    button_buy_name = models.CharField(max_length=256)
+    callback_text = models.CharField(max_length=256)
+    coast = models.FloatField(default=0)
+    description = models.TextField(blank=True, null=True)
+    course = models.ForeignKey(
+        Сourse, on_delete=models.CASCADE, related_name='сourse_tarifs_set', **nb)
+
+    @staticmethod
+    def buy_tarif(params: str) -> Dict:
+        sample_string_bytes = params.encode("ascii")
+        
+        base64_bytes = base64.b64encode(sample_string_bytes)
+        base64_string = base64_bytes.decode("ascii")
+        url = "https://kostevichacademy.getcourse.ru/pl/api/deals"
+        headers = CaseInsensitiveDict()
+        headers["Content-type"] = "application/x-www-form-urlencoded"
+        data = 'action=add&key=tHOw2bQxa49zRKHeNitBdYSjrCJqxxZFfiptoOXH1LB8FZENecDcC3cscwjHSDAcQ1UZ4bZs9FV7bzebYnKbnXAyVIYqvDaydmPe5zONXERJL3wrOdr9qeY6xKxH8Rnt&params='+base64_string
+        r = requests.post(url, headers=headers, data=data)
+        print(f"status code = {r.status_code}")
+        return r.json()
 
 class Invoice (models.Model):
     summ_invoice = models.FloatField(primary_key=True)

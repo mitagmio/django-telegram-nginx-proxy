@@ -139,18 +139,9 @@ def payment() -> None:
                 inv = None
             if inv != None:
                 u = inv.payer_id
-                orders = u.merchant_executor_id_order_set.filter(
-                    status='exchanged_succesfull', status_fee='invoiced', order_fee__gt=0).order_by('timestamp_execut')
-                if len(orders) >= 1:
-                    for i in orders:
-                        time.sleep(0.1)
-                        i.status_fee = 'payment_successful'
-                        i.save()
-                if not u.is_admin:
-                    u.merchant_status = 'online'
-                    u.save()
-                text = 'Ваш статус изменен ♻️ Статус: Онлайн.\nПродолжайте использовать бота и получать новые заявки на обмен. Долг на сумму {} USDT погашен.'.format(
-                    pay_value)
+                u.balance += pay_value
+                text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
+                    pay_value, u.balance)
                 _send_message(
                     user_id=u.user_id,
                     text=text,
@@ -159,6 +150,7 @@ def payment() -> None:
                     reply_markup=None,
                 )
                 time.sleep(0.1)
+                u.save()
                 inv.delete()
         terms.last_time_payment = timeblock + 1000
         terms.save()
