@@ -18,6 +18,9 @@ def make_keyboard_for_start() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text='💃📋 Проекты E. Kostevich', callback_data='Меню'),
         ],
         [
+            InlineKeyboardButton(text='🎥 🛑YouTube', url="https://www.youtube.com/c/EkaterinaKostevich")
+        ],
+        [
             InlineKeyboardButton(text='👫💃 Реферальные ссылки', url="https://telegra.ph/Referalnye-ssylki-dlya-registracii-na-birzhe-04-15")
         ],
         [
@@ -30,7 +33,7 @@ def make_keyboard_for_start() -> InlineKeyboardMarkup:
 
 def make_keyboard_for_check_username() -> InlineKeyboardMarkup:
     buttons = [[
-        InlineKeyboardButton(start_button_text, callback_data='Старт')
+        InlineKeyboardButton(text='💰💰 Кошелек', callback_data='Кошелек')
     ]]
     return InlineKeyboardMarkup(buttons)
 
