@@ -133,9 +133,9 @@ cd lanka_bot
 
 Create virtual environment (optional)
 ``` bash
-python3 -m venv dtb_venv
+python -m venv dtb_venv
 source dtb_venv/bin/activate
-python3 -m pip install --upgrade pip
+python -m pip install --upgrade pip
 ```
 
 Install all requirements:
