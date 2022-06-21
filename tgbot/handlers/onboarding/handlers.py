@@ -135,7 +135,15 @@ def check_username(update: Update, context: CallbackContext, text='\n'):
     return True
 
 # Проверка на email
-
+def chenge_email(update: Update, context: CallbackContext, text='\n'):
+    message = get_message_bot(update)
+    u, _ = User.get_user_and_created(update, context)
+    u.state = static_state.S_EMAIL
+    id = context.bot.send_message(message.chat.id, static_text.NOT_EMAIL_NAME.format(
+        text=text, tgid=message.chat.id), reply_markup=make_keyboard_for_check_username())  # отправляет приветствие и кнопку
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
 
 def check_email(update: Update, context: CallbackContext, text='\n'):
     message = get_message_bot(update)
@@ -218,7 +226,7 @@ def cmd_wallet(update: Update, context: CallbackContext):
         if check_email(update, context):
             u.state = static_state.S_MENU
             id = context.bot.send_message(
-                message.chat.id, static_text.WALLET.format(balance=u.balance), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
+                message.chat.id, static_text.WALLET.format(balance=u.balance, email=u.email), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
             u.message_id = id.message_id
             u.save()
     del_mes(update, context, True)
@@ -228,15 +236,17 @@ def cmd_wallet(update: Update, context: CallbackContext):
 def cmd_top_up_wallet_usdt(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
-    # помечаем состояние пользователя.
-    u.state = static_state.S_TOP_UP_WALLET_USDT
-    invoice = Invoice.objects.filter(payer_id=u)
-    if len(invoice) > 0:
-        return s_top_up_wallet_usdt(update, context, invoice[0].summ_invoice)
-    id = context.bot.send_message(
-        message.chat.id, static_text.WALLET_SUMM, reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
-    u.message_id = id.message_id
-    u.save()
+    if check_username(update, context):
+        if check_email(update, context):
+            # помечаем состояние пользователя.
+            u.state = static_state.S_TOP_UP_WALLET_USDT
+            invoice = Invoice.objects.filter(payer_id=u)
+            if len(invoice) > 0:
+                return s_top_up_wallet_usdt(update, context, invoice[0].summ_invoice)
+            id = context.bot.send_message(
+                message.chat.id, static_text.WALLET_SUMM, reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
+            u.message_id = id.message_id
+            u.save()
     del_mes(update, context, True)
 
 # Показываем счет на оплату
@@ -390,6 +400,7 @@ Menu_Dict = {
     'Старт': command_start,
     'Меню': cmd_menu,
     'Кошелек': cmd_wallet,
+    'Почта': chenge_email,
     'Пополнить_Кошелек_TRC20':cmd_top_up_wallet_usdt,
     'Удалить_invoice':cmd_del_invoice_trc20,
     'Академия': cmd_academy,
