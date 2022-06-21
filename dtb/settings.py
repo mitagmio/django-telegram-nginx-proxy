@@ -166,6 +166,8 @@ TELEGRAM_WEBHOOK_URL  = os.getenv("TELEGRAM_WEBHOOK_URL", default=None)
 TELEGRAM_LOGS_CHAT_ID = os.getenv("TELEGRAM_LOGS_CHAT_ID", default=None)
 BINANCE_API  = os.getenv("BINANCE_API", default=None)
 BINANCE_SECRET = os.getenv("BINANCE_SECRET", default=None)
+API_GETCOURSE_RU = os.getenv("API_GETCOURSE_RU", default=None)
+TRON_TRC20 = os.getenv("TRON_TRC20", default=None)
 
 # -----> SENTRY
 # import sentry_sdk
