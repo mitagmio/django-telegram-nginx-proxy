@@ -15,7 +15,7 @@ from django.db.models import QuerySet, Manager
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from dtb.settings import BINANCE_API, BINANCE_SECRET, DEBUG
+from dtb.settings import BINANCE_API, BINANCE_SECRET, DEBUG, PROJECT_NAME_GETCOURSE_RU, API_GETCOURSE_RU, TRON_TRC20
 from tgbot.handlers.utils.info import extract_user_data_from_update
 from utils.models import CreateUpdateTracker, nb, CreateTracker, GetOrNoneManager
 
@@ -260,10 +260,10 @@ class Tarif (models.Model):
         
         base64_bytes = base64.b64encode(sample_string_bytes)
         base64_string = base64_bytes.decode("ascii")
-        url = "https://kostevichacademy.getcourse.ru/pl/api/deals"
+        url = "https://"+PROJECT_NAME_GETCOURSE_RU+".getcourse.ru/pl/api/deals"
         headers = CaseInsensitiveDict()
         headers["Content-type"] = "application/x-www-form-urlencoded"
-        data = 'action=add&key=tHOw2bQxa49zRKHeNitBdYSjrCJqxxZFfiptoOXH1LB8FZENecDcC3cscwjHSDAcQ1UZ4bZs9FV7bzebYnKbnXAyVIYqvDaydmPe5zONXERJL3wrOdr9qeY6xKxH8Rnt&params='+base64_string
+        data = 'action=add&key='+API_GETCOURSE_RU+'&params='+base64_string
         r = requests.post(url, headers=headers, data=data)
         print(f"status code = {r.status_code}")
         return r.json()
@@ -275,7 +275,7 @@ class Invoice (models.Model):
 
     @staticmethod
     def get_payment(min_timestamp: int) -> Dict:
-        url = "https://api.trongrid.io/v1/accounts/TYXmiSD7KoLmFyWoPauM2MpXfpS3Z1fsCq/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
+        url = "https://api.trongrid.io/v1/accounts/"+TRON_TRC20+"/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
             min_timestamp)
         headers = CaseInsensitiveDict()
         headers["Content-type"] = "application/json"
