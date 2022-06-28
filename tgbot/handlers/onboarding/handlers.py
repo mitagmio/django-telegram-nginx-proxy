@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext
 from traitlets import Float
 
 from tgbot.handlers.onboarding import static_text, static_state
-from tgbot.handlers.utils.info import extract_user_data_from_update
+from tgbot.handlers.utils.info import extract_user_data_from_update, generate_qr
 from tgbot.models import User, P2p, Invoice, Tarif, Сourse
 from tgbot.handlers.onboarding.keyboards import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -266,8 +266,9 @@ def s_top_up_wallet_usdt(update: Update, context: CallbackContext, summ: float =
             u.state = static_state.S_MENU
         else:
             return cmd_top_up_wallet_usdt(update, context)
-    id = context.bot.send_message(
-        message.chat.id, static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
+    id = context.bot.send_photo(
+            chat_id=message.chat.id, photo=generate_qr('TYXmiSD7KoLmFyWoPauM2MpXfpS3Z1fsCq').getvalue(), caption=static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
+    #context.bot.send_message(message.chat.id, static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)

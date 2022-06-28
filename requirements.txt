@@ -33,3 +33,7 @@ python-telegram-bot
 
 # monitoring
 # sentry-sdk
+
+# qr
+Pillow
+qrcode
