@@ -20,7 +20,7 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 def message_handler_func(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     print(update)
-    if update.message.chat.id != -1001717597940:
+    if update.message.chat.id != -1001796561677 and update.channel_post.chat.id != -1001695923729:
         if u.state in State_Dict:
             func_menu = State_Dict[u.state]
             func_menu(update, context)
@@ -336,7 +336,7 @@ def buy_tarif(update: Update, context: CallbackContext, tarif_id: int):
             u.balance -= t.coast
             u.save()
         else:
-            text = static_text.NOT_BUY_COURSE.format(difference=t.coast-u.balance, balance=u.balance)
+            text = static_text.NOT_BUY.format(difference=t.coast-u.balance, balance=u.balance)
             reply_markup = make_keyboard_for_no_money()
         id = context.bot.send_message(
                 message.chat.id, text,
@@ -355,6 +355,58 @@ def cmd_venture(update: Update, context: CallbackContext):
         reply_markup=make_keyboard_for_cmd_venture(), parse_mode="HTML", disable_web_page_preview=True)
     u.message_id = id.message_id
     u.save()
+    del_mes(update, context, True)
+
+# selected
+def cmd_selected(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    reply_markup = make_keyboard_for_cmd_selected()
+    timestamp = int(datetime.datetime.today().timestamp())
+    if u.execute_selected_time > timestamp:
+        execute_selected_time = u.execute_selected_time
+        time_string_format = '‼️ Доступ заканчивается: ' + str(datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M'))
+    else:
+        time_string_format = ''
+    id = context.bot.send_message(
+                message.chat.id, static_text.TEXT_SELECTED.format(end_date=time_string_format),
+                reply_markup=reply_markup, parse_mode="HTML")
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+def buy_selected(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+
+    if check_email(update, context):
+        timestamp = int(datetime.datetime.today().timestamp())
+        if u.balance >= 100:
+            reply_markup = make_keyboard_for_cmd_help()
+            u.balance -= 100
+            if timestamp < u.execute_selected_time:
+                u.execute_selected_time += 60 * 60 * 24 * 30
+                execute_selected_time = u.execute_selected_time
+                time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
+                text = static_text.BUY_SELECTED_TOP_UP.format(end_date='‼️ Доступ заканчивается: ' + str(time_string_format))
+            else:
+                execute_selected_time = timestamp + 60 * 60 * 24 * 30
+                time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
+                u.execute_selected_time = execute_selected_time
+                link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=execute_selected_time, member_limit=1).invite_link
+                link_channel = context.bot.create_chat_invite_link(chat_id=-1001695923729, expire_date=execute_selected_time, member_limit=1).invite_link
+                print('link_chat',link_chat)
+                print('link_channel',link_channel)
+                text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_chat=link_chat, link_channel=link_channel)
+            u.save()
+        else:
+            text = static_text.NOT_BUY.format(difference=100-u.balance, balance=u.balance)
+            reply_markup = make_keyboard_for_no_money()
+        id = context.bot.send_message(
+                message.chat.id, text,
+                reply_markup=reply_markup, parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
     del_mes(update, context, True)
 
 ###################################
@@ -408,6 +460,8 @@ Menu_Dict = {
     'Курс': cmd_academy_course,
     'Тариф': buy_tarif,
     'Венчур': cmd_venture,
+    'Селектед': cmd_selected,
+    'Купить_Селектед': buy_selected,
     'Администрирование': cmd_admin,
     'pass': cmd_pass,
     'Help': cmd_help,

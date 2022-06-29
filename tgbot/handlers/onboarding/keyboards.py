@@ -42,9 +42,9 @@ def make_keyboard_for_cmd_menu(adm) -> InlineKeyboardMarkup:
         btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_vc = InlineKeyboardButton(
-            text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', callback_data='Венчур')
+            text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
         btn_selected = InlineKeyboardButton(
-            text='🏵💸 Kostevich Selected', callback_data='Меню')
+            text='🏵💸 Kostevich Selected', callback_data='Селектед')
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', callback_data='Академия')
         buttons.append([btn_vc])
@@ -136,6 +136,16 @@ def make_keyboard_for_cmd_venture() -> InlineKeyboardMarkup:
     buttons.append([InlineKeyboardButton(text='Узнать больше о фонде', url='https://t.me/KostevichSupport_Bot')])
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
     btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
+    buttons.append([btn_main, btn_back])
+    return InlineKeyboardMarkup(buttons)
+
+def make_keyboard_for_cmd_selected() -> InlineKeyboardMarkup:
+    buttons = []
+    btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
+    btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
+    btn_top_up_usdt = InlineKeyboardButton(
+            text='💸 Купить доступ 100$', callback_data='Купить_Селектед')
+    buttons.append([btn_top_up_usdt])
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)
 

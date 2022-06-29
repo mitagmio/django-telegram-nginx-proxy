@@ -12,7 +12,7 @@ from tgbot.models import P2p, User, Terms, Invoice
 
 from dtb.celery import app
 from celery.utils.log import get_task_logger
-from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, \
+from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
     _from_celery_entities_to_entities, _from_celery_markup_to_markup
 
 logger = get_task_logger(__name__)
@@ -155,3 +155,35 @@ def payment() -> None:
         terms.last_time_payment = timeblock + 1000
         terms.save()
     logger.info("Payment invoices was completed!")
+
+
+@app.task(ignore_result=True)
+def kick_selected() -> None:
+    """ Выгоняем пользователей из selected """
+    logger.info("Starting kicking Selected users")
+    timestamp = int(datetime.today().timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        Users = User.objects.filter(execute_selected_time__lt=timestamp)
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        for u in Users:
+            _kick_member(
+                user_id=u.user_id,
+                chat_id=-1001796561677
+            )
+            time.sleep(0.1)
+            _kick_member(
+                user_id=u.user_id,
+                chat_id=-1001695923729
+            )
+            time.sleep(0.1)
+            u.execute_selected_time = 0
+            u.save()
+    logger.info("Selected kicked users was completed!")

@@ -185,6 +185,7 @@ class User(CreateUpdateTracker):
     message_id = models.PositiveBigIntegerField(default=0)
     ref_id = models.PositiveBigIntegerField(default=0)
     balance = models.FloatField(default=0)
+    execute_selected_time = models.PositiveBigIntegerField(default=0)
     is_blocked_bot = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
