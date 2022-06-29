@@ -252,6 +252,20 @@ ORDERS_CHANGE_MAILING: every minute
 p2p_cource: 0 */1 * * * (m/h/dM/MY/d) UTC
 ```
 
+Ограничиваем БАЗУ для коннекта из вне:
+```
+docker exec -it dtb_postgres bash
+apt update && apt install nano && nano /var/lib/postgresql/data/pg_hba.conf
+```
+далее меняем
+```
+host    all             all             all                     md5
+```
+на ограничение доступа по IP маскам см (https://ru.adminsub.net/ipv4-subnet-calculator/192.0.0.0/8)
+```
+host    all             all             192.0.0.0/8             md5
+host    all             all             127.0.0.1/32            md5
+```
 
 БЕКАПИТЬ БАЗУ ОТСЮДА:
 ```

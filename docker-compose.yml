@@ -101,3 +101,11 @@ volumes:
   html:
   vhost:
   acme:
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.167.0.0/16"
+          gateway: "192.167.0.1"
