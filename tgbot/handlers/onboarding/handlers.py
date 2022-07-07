@@ -20,7 +20,7 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 def message_handler_func(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     print(update)
-    if update.message.chat.id != -1001796561677 and update.channel_post.chat.id != -1001695923729:
+    if (hasattr(update, 'message') and update.message != None and update.message.chat.id != -1001796561677) or (hasattr(update, 'channel_post') and update.channel_post != None and update.channel_post.chat.id != -1001695923729):
         if u.state in State_Dict:
             func_menu = State_Dict[u.state]
             func_menu(update, context)
@@ -287,7 +287,7 @@ def cmd_academy(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
     try:
-        Сourses = Сourse.objects.all()
+        Сourses = Сourse.objects.all().order_by('id')
         text = ''
         for c in Сourses:
             text += "<u>{title}</u> - {teaser}\n\n".format(title=c.title, teaser=c.teaser)
@@ -308,7 +308,7 @@ def cmd_academy_course(update: Update, context: CallbackContext, course_id: int)
     # try:
     cource = Сourse.objects.get(id=course_id)
     tarifs = Сourse.objects.get(id=course_id).сourse_tarifs_set.all()
-    text = 'Тарифы:\n\n'
+    text = '🪙 <b>ТАРИФЫ:</b>\n\n'
     for t in tarifs:
         text += t.__dict__['description']+'\n\n'
     reply_markup = make_keyboard_for_academy_course(tarifs.values())
@@ -316,7 +316,7 @@ def cmd_academy_course(update: Update, context: CallbackContext, course_id: int)
     #     reply_markup = make_keyboard_for_academy_course()
     #     text = "Тарифов пока нет 😇"
     id = context.bot.send_message(
-        message.chat.id,  text + cource.description,
+        message.chat.id,  cource.description +'\n\n' + text,
         reply_markup=reply_markup, parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
@@ -422,6 +422,16 @@ def cmd_help(update: Update, context: CallbackContext):
     u.save()
     del_mes(update, context, True)
 
+def cmd_soon(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+
+    id = context.bot.send_message(
+        message.chat.id, static_text.SOON,
+        reply_markup=make_keyboard_for_cmd_help(), parse_mode="HTML", disable_web_page_preview=True)
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
 
 def cmd_admin(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
@@ -461,6 +471,7 @@ Menu_Dict = {
     'Тариф': buy_tarif,
     'Венчур': cmd_venture,
     'Селектед': cmd_selected,
+    'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
     'Администрирование': cmd_admin,
     'pass': cmd_pass,

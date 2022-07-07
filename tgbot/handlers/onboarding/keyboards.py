@@ -44,7 +44,7 @@ def make_keyboard_for_cmd_menu(adm) -> InlineKeyboardMarkup:
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
         btn_selected = InlineKeyboardButton(
-            text='🏵💸 Kostevich Selected', callback_data='Селектед')
+            text='🏵💸 Kostevich Selected', callback_data='Селектед_soon')#Селектед
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', callback_data='Академия')
         buttons.append([btn_vc])
