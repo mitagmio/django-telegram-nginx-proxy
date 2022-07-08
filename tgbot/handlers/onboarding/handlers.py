@@ -290,7 +290,7 @@ def cmd_academy(update: Update, context: CallbackContext):
         Сourses = Сourse.objects.all().order_by('id')
         text = ''
         for c in Сourses:
-            text += "<u>{title}</u> - {teaser}\n\n".format(title=c.title, teaser=c.teaser)
+            text += "➡️ <u><b>{title}</b></u> - {teaser}\n\n".format(title=c.title, teaser=c.teaser)
         reply_markup = make_keyboard_for_cmd_academy(Сourses.values())
     except:
         reply_markup = make_keyboard_for_cmd_help()
@@ -307,7 +307,7 @@ def cmd_academy_course(update: Update, context: CallbackContext, course_id: int)
     message = get_message_bot(update)
     # try:
     cource = Сourse.objects.get(id=course_id)
-    tarifs = Сourse.objects.get(id=course_id).сourse_tarifs_set.all()
+    tarifs = Сourse.objects.get(id=course_id).сourse_tarifs_set.all().order_by('id')
     text = '🪙 <b>ТАРИФЫ:</b>\n\n'
     for t in tarifs:
         text += t.__dict__['description']+'\n\n'
