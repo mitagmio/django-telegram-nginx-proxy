@@ -174,11 +174,11 @@ def kick_selected() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            _kick_member(
-                user_id=u.user_id,
-                chat_id=-1001796561677
-            )
-            time.sleep(0.1)
+            # _kick_member(
+            #     user_id=u.user_id,
+            #     chat_id=-1001796561677
+            # )
+            # time.sleep(0.1)
             _kick_member(
                 user_id=u.user_id,
                 chat_id=-1001695923729
