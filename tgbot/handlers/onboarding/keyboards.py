@@ -44,7 +44,7 @@ def make_keyboard_for_cmd_menu(adm) -> InlineKeyboardMarkup:
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
         btn_selected = InlineKeyboardButton(
-            text='🏵💸 Kostevich Selected', callback_data='Селектед_soon')#Селектед
+            text='🏵💸 Kostevich SELECTED', callback_data='Селектед')#Селектед_soon
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', callback_data='Академия')
         buttons.append([btn_vc])
@@ -145,6 +145,9 @@ def make_keyboard_for_cmd_selected() -> InlineKeyboardMarkup:
     btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
     btn_top_up_usdt = InlineKeyboardButton(
             text='💸 Купить доступ 100$', callback_data='Купить_Селектед')
+    btn_about_selected = InlineKeyboardButton(
+            text='⁉️ О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
+    buttons.append([btn_about_selected])
     buttons.append([btn_top_up_usdt])
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)
