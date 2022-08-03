@@ -259,7 +259,7 @@ def s_top_up_wallet_usdt(update: Update, context: CallbackContext, summ: float =
         if isfloat(summ) and float(summ) > 0:
             summ = float(summ)
             while len(Invoice.objects.filter(summ_invoice=summ)) > 0:
-                    summ += 0.01
+                    summ = ((summ * 100) + 1)/100
                     time.sleep(0.1)
             Invoice.objects.create(summ_invoice=summ, payer_id=u)
             # помечаем состояние пользователя.
