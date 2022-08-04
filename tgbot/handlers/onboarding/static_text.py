@@ -149,6 +149,7 @@ WALLET_ADMIN = """
 
 WALLET_ADMIN_USDT = """
 Ник пользователя: {username}
+Баланс: {balance}
 Выставлен счет на сумму: 
 <code>{summ_float}</code>
 

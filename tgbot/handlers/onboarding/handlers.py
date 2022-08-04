@@ -471,7 +471,7 @@ def s_top_up_user_admin(update: Update, context: CallbackContext):
         else:
             invoice = 0 
         id = context.bot.send_message(
-            message.chat.id, static_text.WALLET_ADMIN_USDT.format(username=username.username, summ_float=invoice), reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
+            message.chat.id, static_text.WALLET_ADMIN_USDT.format(username=username.username, summ_float=invoice, balance=username.balance), reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
         u.state = static_state.S_TOP_UP_WALLET_USDT_ADMIN
         u.message_id = id.message_id
         u.save()
