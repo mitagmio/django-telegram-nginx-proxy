@@ -94,17 +94,33 @@ def _del_message(
         success = True
     return success
 
+def _get_admins(
+    chat_id: Union[str, int],
+    tg_token: str = TELEGRAM_TOKEN,
+) -> List[Union[str, int]]:
+    bot = telegram.Bot(tg_token)
+    try:
+        admins = bot.get_chat_administrators(chat_id=chat_id)
+    except telegram.error.Unauthorized:
+        print(f"Can't get admins from {chat_id}")
+        success = []
+    finally:
+        success = []
+        for a in admins:
+            success.append(a.user.id)
+    return success
+
 def _kick_member(
     chat_id: Union[str, int],
     user_id: Union[str, int],
+    admin_ids: List[Union[str, int]],
     tg_token: str = TELEGRAM_TOKEN,
 ) -> bool:
     bot = telegram.Bot(tg_token)
     try:
-        admins = bot.get_chat_administrators(chat_id=chat_id)
         admin = False
-        for a in admins:
-            if a.user.id == user_id:
+        for a in admin_ids:
+            if a == user_id:
                 admin = True
         if admin == False:
             m = bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
