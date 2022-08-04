@@ -18,7 +18,7 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 
 
 def message_handler_func(update: Update, context: CallbackContext):
-    print(update)
+    # print(update)
     if (hasattr(update, 'message') and update.message != None and update.message.chat.id != -1001796561677) or (hasattr(update, 'channel_post') and update.channel_post != None and update.channel_post.chat.id != -1001695923729):
         u = User.get_user(update, context)
         if u.state in State_Dict:
