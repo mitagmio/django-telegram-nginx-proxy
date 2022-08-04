@@ -13,7 +13,7 @@ from tgbot.models import P2p, User, Terms, Invoice
 from dtb.celery import app
 from celery.utils.log import get_task_logger
 from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
-    _from_celery_entities_to_entities, _from_celery_markup_to_markup
+    _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins
 
 logger = get_task_logger(__name__)
 
@@ -166,10 +166,13 @@ def kick_selected() -> None:
         f"timestamp {int(timestamp)}")
     try:
         Users = User.objects.filter(execute_selected_time__lt=timestamp)
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
         # logger.info(
         #     f"Users {Users}")
     except Exception as e:
         Users = dict()
+        admin_ids = []
         logger.info(
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
@@ -181,9 +184,10 @@ def kick_selected() -> None:
             # time.sleep(0.1)
             _kick_member(
                 user_id=u.user_id,
-                chat_id=-1001695923729
+                admin_ids=admin_ids,
+                chat_id=channel_id
             )
-            time.sleep(0.1)
+            time.sleep(0.5)
             u.execute_selected_time = 0
             u.save()
     logger.info("Selected kicked users was completed!")
