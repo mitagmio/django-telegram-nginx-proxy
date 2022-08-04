@@ -130,28 +130,29 @@ def payment() -> None:
         for t in Transactions:
             if int(t['block_timestamp']) > timeblock:
                 timeblock = int(t['block_timestamp'])
-            pay_value = float(t['value']) / \
-                10**float(t['token_info']['decimals'])
+            if t['token_info']['symbol']=='USDT':
+                pay_value = float(t['value']) / \
+                    10**float(t['token_info']['decimals'])
 
-            try:
-                inv = Invoice.objects.get(summ_invoice=pay_value)
-            except Invoice.DoesNotExist:
-                inv = None
-            if inv != None:
-                u = inv.payer_id
-                u.balance += pay_value
-                text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
-                    pay_value, u.balance)
-                _send_message(
-                    user_id=u.user_id,
-                    text=text,
-                    entities=None,
-                    parse_mode=telegram.ParseMode.HTML,
-                    reply_markup=None,
-                )
-                time.sleep(0.1)
-                u.save()
-                inv.delete()
+                try:
+                    inv = Invoice.objects.get(summ_invoice=pay_value)
+                except Invoice.DoesNotExist:
+                    inv = None
+                if inv != None:
+                    u = inv.payer_id
+                    u.balance += pay_value
+                    text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
+                        pay_value, u.balance)
+                    _send_message(
+                        user_id=u.user_id,
+                        text=text,
+                        entities=None,
+                        parse_mode=telegram.ParseMode.HTML,
+                        reply_markup=None,
+                    )
+                    time.sleep(0.1)
+                    u.save()
+                    inv.delete()
         terms.last_time_payment = timeblock + 1000
         terms.save()
     logger.info("Payment invoices was completed!")
