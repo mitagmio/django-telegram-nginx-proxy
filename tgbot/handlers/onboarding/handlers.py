@@ -437,14 +437,82 @@ def cmd_admin(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     if u.is_admin:
         message = get_message_bot(update)
-        id = context.bot.send_message(message.chat.id, static_text.ADMIN_MENU_TEXT.format(
-            P2p.pay_trade_history()), reply_markup=make_keyboard_for_cmd_admin(), parse_mode="HTML")
+        id = context.bot.send_message(message.chat.id, static_text.ADMIN_MENU_TEXT, reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
+        #static_text.ADMIN_MENU_TEXT.format(P2p.pay_trade_history())
+        u.state = static_state.S_MENU_ADMIN
         u.message_id = id.message_id
         u.save()
         del_mes(update, context, True)
     else:
         command_start(update, context)
 
+def cmd_top_up_user_admin(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    if u.is_admin and u.user_id == 352482305:
+        message = get_message_bot(update)
+        # помечаем состояние пользователя.
+        u.state = static_state.S_TOP_UP_WALLET_ADMIN
+        id = context.bot.send_message(
+            message.chat.id, static_text.WALLET_ADMIN, reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
+        del_mes(update, context, True)
+    else:
+        command_start(update, context)
+
+def s_top_up_user_admin(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    if u.is_admin and u.user_id == 352482305:
+        message = get_message_bot(update)
+        username = User.get_user_by_username_or_user_id(message.text)
+        invoice = Invoice.objects.filter(payer_id=username)
+        if len(invoice) > 0:
+            invoice = invoice[0].summ_invoice
+        else:
+            invoice = 0 
+        id = context.bot.send_message(
+            message.chat.id, static_text.WALLET_ADMIN_USDT.format(username=username.username, summ_float=invoice), reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
+        u.state = static_state.S_TOP_UP_WALLET_USDT_ADMIN
+        u.message_id = id.message_id
+        u.save()
+        del_mes(update, context, True)
+    else:
+        command_start(update, context)
+
+
+def top_up_user_wallet_admin(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    if u.is_admin and u.user_id == 352482305:
+        message = get_message_bot(update)
+        username = User.get_user_by_username_or_user_id(message.text.split(' ')[0])
+        summ = float(message.text.split(' ')[1])
+        # помечаем состояние пользователя.
+        u.state = static_state.S_MENU_ADMIN
+        try:
+            invoice = Invoice.objects.get(payer_id=username)
+            inv = invoice.summ_invoice
+            invoice.delete()
+        except:
+            inv = 0
+            pass
+        username.balance += summ
+        text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
+            summ, username.balance)
+        context.bot.send_message(
+            chat_id =username.user_id,
+            text=text,
+            entities=None,
+            parse_mode="HTML",
+            reply_markup=None,
+        )
+        username.save()
+        id = context.bot.send_message(
+            message.chat.id, static_text.WALLET_ADMIN_FINAL.format(username=username.username, summ_float=inv, summ_admin=summ), reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
+        del_mes(update, context, True)
+    else:
+        command_start(update, context)
 
 def cmd_pass():
     pass
@@ -456,6 +524,10 @@ State_Dict = {
     static_state.S_MENU: del_mes,
     static_state.S_TOP_UP_WALLET_USDT: s_top_up_wallet_usdt,
     static_state.S_EMAIL: s_email,
+    # админка
+    static_state.S_TOP_UP_WALLET_ADMIN: s_top_up_user_admin,
+    static_state.S_TOP_UP_WALLET_USDT_ADMIN: top_up_user_wallet_admin,
+
 }
 
 # словарь функций Меню
@@ -474,6 +546,7 @@ Menu_Dict = {
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
     'Администрирование': cmd_admin,
+    'Пополнить_пользователю': cmd_top_up_user_admin,
     'pass': cmd_pass,
     'Help': cmd_help,
 }

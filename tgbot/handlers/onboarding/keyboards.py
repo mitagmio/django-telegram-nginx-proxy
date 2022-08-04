@@ -159,10 +159,14 @@ def make_keyboard_for_cmd_help() -> InlineKeyboardMarkup:
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)
 
-def make_keyboard_for_cmd_admin() -> InlineKeyboardMarkup:
+def make_keyboard_for_cmd_admin(u) -> InlineKeyboardMarkup:
     buttons = []
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
     btn_main = InlineKeyboardButton(
         text='⏮ В начало', callback_data='Старт')
+    btn_top_up_admin = InlineKeyboardButton(
+            text='Пополнить пользователю', callback_data='Пополнить_пользователю')
+    if u.user_id == 352482305:
+        buttons.append([btn_top_up_admin])
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)
