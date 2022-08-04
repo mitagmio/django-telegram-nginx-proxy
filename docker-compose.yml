@@ -7,6 +7,10 @@ services:
     #command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     command: bash -c "gunicorn dtb.asgi:application --bind 0.0.0.0:8000 -w 4 -k uvicorn.workers.UvicornWorker"
     restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - .:/code
       - ./dtb/static:/static
@@ -30,6 +34,10 @@ services:
     image: postgres:12
     container_name: dtb_postgres
     restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -41,6 +49,10 @@ services:
     image: redis:alpine
     container_name: dtb_redis
     restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
   nginx-proxy:
     container_name: nginx-proxy
     build: nginx
@@ -49,6 +61,10 @@ services:
     ports:
       - 443:443
       - 80:80
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - ./dtb/static:/static
       - ./dtb/media:/media
@@ -62,6 +78,10 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     env_file:
       - ./.env_letsencrypt
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -74,6 +94,10 @@ services:
     build: .
     container_name: dtb_celery
     command: celery -A dtb worker --loglevel=INFO
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - .:/code
     env_file:
@@ -86,6 +110,10 @@ services:
     build: .
     container_name: dtb_beat
     command: celery -A dtb beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - .:/code
     env_file:
