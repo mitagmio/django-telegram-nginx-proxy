@@ -384,6 +384,8 @@ def buy_selected(update: Update, context: CallbackContext):
         if u.balance >= 100:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= 100
+            if timestamp < 1661990400:
+                u.first_month = True
             if timestamp < u.execute_selected_time:
                 u.execute_selected_time += 60 * 60 * 24 * 30
                 execute_selected_time = u.execute_selected_time
@@ -496,6 +498,7 @@ def top_up_user_wallet_admin(update: Update, context: CallbackContext):
             inv = 0
             pass
         username.balance += summ
+        username.save()
         text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
             summ, username.balance)
         context.bot.send_message(
@@ -505,7 +508,6 @@ def top_up_user_wallet_admin(update: Update, context: CallbackContext):
             parse_mode="HTML",
             reply_markup=None,
         )
-        username.save()
         id = context.bot.send_message(
             message.chat.id, static_text.WALLET_ADMIN_FINAL.format(username=username.username, summ_float=inv, summ_admin=summ), reply_markup=make_keyboard_for_cmd_admin(u), parse_mode="HTML")
         u.message_id = id.message_id
