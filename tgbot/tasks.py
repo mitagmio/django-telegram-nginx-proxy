@@ -166,7 +166,7 @@ def kick_selected() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
-        Users = User.objects.filter(execute_selected_time__lt=timestamp)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp).filter(execute_selected_time__gt=0)
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
         # logger.info(
