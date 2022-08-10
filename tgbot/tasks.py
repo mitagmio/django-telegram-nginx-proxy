@@ -141,6 +141,7 @@ def payment() -> None:
                 if inv != None:
                     u = inv.payer_id
                     u.balance += pay_value
+                    u.save()
                     text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
                         pay_value, u.balance)
                     _send_message(
@@ -151,7 +152,6 @@ def payment() -> None:
                         reply_markup=None,
                     )
                     time.sleep(0.1)
-                    u.save()
                     inv.delete()
         terms.last_time_payment = timeblock + 1000
         terms.save()
