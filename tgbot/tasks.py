@@ -12,6 +12,7 @@ from tgbot.models import P2p, User, Terms, Invoice
 
 from dtb.celery import app
 from celery.utils.log import get_task_logger
+from dtb.settings import TELEGRAM_LOGS_CHAT_ID
 from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
     _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins
 
@@ -119,12 +120,12 @@ def payment() -> None:
     try:
         Transactions = Invoice.get_payment(
             int(terms.last_time_payment))['data']
-        logger.info(
-            f"Transactions {Transactions}")
+        tr_text = f"Transactions {Transactions}"
+        logger.info(tr_text)
     except Exception as e:
         Transactions = dict()
-        logger.info(
-            f"Transactions {len(Transactions)}, reason: {e}")
+        tr_text = f"Transactions {len(Transactions)}, reason: {e}"
+        logger.info(tr_text)
     if len(Transactions) > 0:
         timeblock = 0
         for t in Transactions:
@@ -136,12 +137,18 @@ def payment() -> None:
 
                 try:
                     inv = Invoice.objects.get(summ_invoice=pay_value)
+                    bal_after = inv.payer_id.balance
+                    log_text = f"Invoice payment success {pay_value}, User {inv.payer_id}, id {inv.payer_id.user_id}, bal_before {inv.payer_id.balance}"
+                    logger.info(log_text)
                 except Invoice.DoesNotExist:
                     inv = None
+                    log_text = f"Invoice {pay_value}, Invoice.DoesNotExist. \n Transaction {t}"
+                    logger.info(log_text)
                 if inv != None:
                     u = inv.payer_id
                     u.balance += pay_value
                     u.save()
+                    bal_after = u.balance
                     text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
                         pay_value, u.balance)
                     _send_message(
@@ -153,6 +160,13 @@ def payment() -> None:
                     )
                     time.sleep(0.1)
                     inv.delete()
+                _send_message(
+                    user_id=TELEGRAM_LOGS_CHAT_ID,
+                    text=log_text+f"bal_after {bal_after}",
+                    entities=None,
+                    parse_mode=telegram.ParseMode.HTML,
+                    reply_markup=None,
+                )
         terms.last_time_payment = timeblock + 1000
         terms.save()
     logger.info("Payment invoices was completed!")
