@@ -142,6 +142,7 @@ def payment() -> None:
                     logger.info(log_text)
                 except Invoice.DoesNotExist:
                     inv = None
+                    bal_after = "None"
                     log_text = f"Invoice {pay_value}, Invoice.DoesNotExist. \n Transaction {t}"
                     logger.info(log_text)
                 if inv != None:
