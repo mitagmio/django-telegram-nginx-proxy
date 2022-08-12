@@ -180,6 +180,40 @@ def kick_selected() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
+        Users = User.objects.filter(execute_selected_time__lt=timestamp).filter(execute_selected_time__gt=0)
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        for u in Users:
+            # _kick_member(
+            #     user_id=u.user_id,
+            #     chat_id=-1001796561677
+            # )
+            # time.sleep(0.1)
+            _kick_member(
+                user_id=u.user_id,
+                admin_ids=admin_ids,
+                chat_id=channel_id
+            )
+            u.execute_selected_time = 0
+            u.save()
+    logger.info("Selected kicked users was completed!")
+
+@app.task(ignore_result=True)
+def kick_selected_all() -> None:
+    """ Выгоняем пользователей из selected """
+    logger.info("Starting kicking all Selected users")
+    timestamp = int(datetime.today().timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
         Users = User.objects.filter(execute_selected_time__lt=timestamp)
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
@@ -202,7 +236,6 @@ def kick_selected() -> None:
                 admin_ids=admin_ids,
                 chat_id=channel_id
             )
-            time.sleep(0.5)
             u.execute_selected_time = 0
             u.save()
-    logger.info("Selected kicked users was completed!")
+    logger.info("Selected kicked all users was completed!")

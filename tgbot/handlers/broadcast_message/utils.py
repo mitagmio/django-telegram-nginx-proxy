@@ -124,8 +124,10 @@ def _kick_member(
                 admin = True
         if admin == False:
             check_in_user = bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+            # print(f"check from {chat_id} member {user_id}.\n {check_in_user}")
             if hasattr(check_in_user, 'status') and (check_in_user.status == 'member'):# 'left' 'member' 'kicked'
                 time.sleep(0.1)
+                print(f"kicked from {chat_id} member {user_id}.\n {check_in_user}")
                 m = bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
     except telegram.error.Unauthorized:
         print(f"Can't kicked from {chat_id} member {user_id}.")
