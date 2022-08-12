@@ -5,7 +5,7 @@ from telegram import MessageEntity, InlineKeyboardButton, InlineKeyboardMarkup
 
 from dtb.settings import TELEGRAM_TOKEN
 from tgbot.models import User
-
+import time
 
 def _from_celery_markup_to_markup(celery_markup: Optional[List[List[Dict]]]) -> Optional[InlineKeyboardMarkup]:
     markup = None
@@ -123,7 +123,10 @@ def _kick_member(
             if a == user_id:
                 admin = True
         if admin == False:
-            m = bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
+            check_in_user = bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+            if hasattr(check_in_user, 'status') and (check_in_user.status == 'member'):# 'left' 'member' 'kicked'
+                time.sleep(0.1)
+                m = bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
     except telegram.error.Unauthorized:
         print(f"Can't kicked from {chat_id} member {user_id}.")
         success = False
