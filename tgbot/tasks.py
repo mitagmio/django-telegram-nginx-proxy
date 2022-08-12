@@ -162,7 +162,7 @@ def payment() -> None:
                     inv.delete()
                 _send_message(
                     user_id=TELEGRAM_LOGS_CHAT_ID,
-                    text=log_text+f", bal_after {bal_after}",
+                    text=log_text+f", bal_after {bal_after} ",
                     entities=None,
                     parse_mode=telegram.ParseMode.HTML,
                     reply_markup=None,
