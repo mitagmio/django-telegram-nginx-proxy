@@ -146,6 +146,21 @@ class P2p(CreateTracker):
         print(f"status code = {r.status_code}")
         return r.json()
 
+class Settings(models.Model):
+    last_time_payment = models.PositiveBigIntegerField(default=1651688047000)
+    key1 = models.CharField(max_length=256, **nb)
+    key2 = models.CharField(max_length=256, **nb)
+    key3 = models.CharField(max_length=256, **nb)
+
+    @classmethod
+    def get_dict(cls) -> Dict:
+        settings = list(cls.objects.all().values())
+        dict_settings = {}
+        for el in settings:
+            dict_settings['last_time_payment'] = el['last_time_payment']
+        return dict_settings
+
+
 
 class Terms(models.Model):
     terms_of_use_user = models.TextField(blank=True, null=True)
