@@ -3,7 +3,7 @@
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, List, Optional, Dict
 
 import telegram
@@ -181,7 +181,7 @@ def kick_selected() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
-        Users = User.objects.filter(execute_selected_time__lt=timestamp).filter(execute_selected_time__gt=0)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=0)
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
         # logger.info(
@@ -203,7 +203,8 @@ def kick_selected() -> None:
                 admin_ids=admin_ids,
                 chat_id=channel_id
             )
-            u.execute_selected_time = 0
+            if u.bonus_programm == 'first_month':
+               u.execute_bonus_time += timestamp + (60 * 60 * 24 * 7)
             u.save()
     logger.info("Selected kicked users was completed!")
 
@@ -240,3 +241,169 @@ def kick_selected_all() -> None:
             u.execute_selected_time = 0
             u.save()
     logger.info("Selected kicked all users was completed!")
+
+@app.task(ignore_result=True)
+def send_invoice_7_selected() -> None:
+    """ Напоминаем пользователям из selected """
+    logger.info("Starting remind Selected users")
+    timestamp = int((datetime.today() + timedelta(days=7)).timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        bts = [
+            [
+                {'text': '💸 Продлить доступ', 'callback_data': 'Купить_Селектед'},
+                {'text': '💢 Не напоминать', 'callback_data': 'Не_напоминать'}
+            ],
+            [
+                {'text':'⏮ В начало', 'callback_data':'Старт'},
+                {'text':'⏪ Назад', 'callback_data':'Меню'}
+            ]
+        ]
+        for u in Users:
+            if u.remind == True:
+                broadcast_message(
+                    user_ids=[u.user_id],
+                    text="""
+Через 7 дней закончится доступ в SELECTED.
+
+Продлить доступ или не напоминать?
+""",
+                    entities = None,
+                    reply_markup = bts, #Optional[List[List[Dict]]]
+                    sleep_between = 0.4,
+                    parse_mode=telegram.ParseMode.HTML,
+                )
+                _del_message(u.user_id, u.message_id)
+    logger.info("Selected users remind was completed!")
+
+@app.task(ignore_result=True)
+def send_invoice_3_selected() -> None:
+    """ Напоминаем пользователям из selected """
+    logger.info("Starting remind Selected users")
+    timestamp = int((datetime.today() + timedelta(days=3)).timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        bts = [
+            [
+                {'text': '💸 Продлить доступ', 'callback_data': 'Купить_Селектед'},
+                {'text': '💢 Не напоминать', 'callback_data': 'Не_напоминать'}
+            ],
+            [
+                {'text':'⏮ В начало', 'callback_data':'Старт'},
+                {'text':'⏪ Назад', 'callback_data':'Меню'}
+            ]
+        ]
+        for u in Users:
+            if u.remind == True:
+                broadcast_message(
+                    user_ids=[u.user_id],
+                    text="""
+Через 3 дня закончится доступ в SELECTED.
+
+Продлить доступ или не напоминать?
+""",
+                    entities = None,
+                    reply_markup = bts, #Optional[List[List[Dict]]]
+                    sleep_between = 0.4,
+                    parse_mode=telegram.ParseMode.HTML,
+                )
+                _del_message(u.user_id, u.message_id)
+    logger.info("Selected users remind was completed!")
+
+@app.task(ignore_result=True)
+def send_invoice_1_selected() -> None:
+    """ Напоминаем пользователям из selected """
+    logger.info("Starting remind Selected users")
+    timestamp = int((datetime.today() + timedelta(days=1)).timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        bts = [
+            [
+                {'text': '💸 Продлить доступ', 'callback_data': 'Купить_Селектед'},
+                {'text': '💢 Не напоминать', 'callback_data': 'Не_напоминать'}
+            ],
+            [
+                {'text':'⏮ В начало', 'callback_data':'Старт'},
+                {'text':'⏪ Назад', 'callback_data':'Меню'}
+            ]
+        ]
+        for u in Users:
+            if u.remind == True:
+                broadcast_message(
+                    user_ids=[u.user_id],
+                    text="""
+Через 1 днень закончится доступ в SELECTED.
+
+Продлить доступ или не напоминать?
+""",
+                    entities = None,
+                    reply_markup = bts, #Optional[List[List[Dict]]]
+                    sleep_between = 0.4,
+                    parse_mode=telegram.ParseMode.HTML,
+                )
+                _del_message(u.user_id, u.message_id)
+    logger.info("Selected users remind was completed!")
+
+@app.task(ignore_result=True)
+def unset_bonus_programm() -> None:
+    """ Снимаем бонусную программу """
+    logger.info("Starting unset bonus")
+    timestamp = int(datetime.today().timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        channel_id = -1001695923729
+        admin_ids = _get_admins(chat_id=channel_id)
+        Users = User.objects.filter(execute_bonus_time__lt=timestamp, execute_bonus_time__gt=1).exclude(user_id__in=admin_ids)
+        # logger.info(
+        #     f"Users {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        for u in Users:
+            u.bonus_programm = None
+            u.execute_bonus_time = 0
+            u.save()
+    logger.info("Unset bonus was completed!")

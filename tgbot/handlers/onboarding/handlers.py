@@ -375,17 +375,27 @@ def cmd_selected(update: Update, context: CallbackContext):
     u.save()
     del_mes(update, context, True)
 
+def not_remind (update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    u.remind = False
+    u.save()
+    command_start(update, context)
+
 def buy_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
 
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
-        if u.balance >= 100:
+        price = 100
+        if u.bonus_programm == 'first_month':
+            price = 100
+        if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
-            u.balance -= 100
+            u.balance -= price
             if timestamp < 1661990400:
                 u.first_month = True
+                u.bonus_programm = 'first_month'
             if timestamp < u.execute_selected_time:
                 u.execute_selected_time += 60 * 60 * 24 * 30
                 execute_selected_time = u.execute_selected_time
@@ -400,9 +410,11 @@ def buy_selected(update: Update, context: CallbackContext):
                 # print('link_chat',link_chat)
                 print('link_channel',link_channel)
                 text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
+            u.execute_bonus_time = 0
+            u.remind = True
             u.save()
         else:
-            text = static_text.NOT_BUY.format(difference=100-u.balance, balance=u.balance)
+            text = static_text.NOT_BUY.format(difference=price-u.balance, balance=u.balance)
             reply_markup = make_keyboard_for_no_money()
         id = context.bot.send_message(
                 message.chat.id, text,
@@ -547,6 +559,7 @@ Menu_Dict = {
     'Селектед': cmd_selected,
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
+    'Не_напоминать': not_remind,
     'Администрирование': cmd_admin,
     'Пополнить_пользователю': cmd_top_up_user_admin,
     'pass': cmd_pass,
