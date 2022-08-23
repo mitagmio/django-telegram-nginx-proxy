@@ -63,7 +63,7 @@ def make_keyboard_for_cmd_wallet() -> InlineKeyboardMarkup:
         btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_top_up_usdt = InlineKeyboardButton(
-            text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек_TRC20')
+            text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек')#Пополнить_Кошелек_TRC20
         btn_change_email = InlineKeyboardButton(
             text='📨 Изменить почту', callback_data='Почта')
         buttons.append([btn_top_up_usdt])
@@ -124,7 +124,7 @@ def make_keyboard_for_no_money() -> InlineKeyboardMarkup:
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
     btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
     btn_top_up_usdt = InlineKeyboardButton(
-            text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек_TRC20')
+            text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек')#Пополнить_Кошелек_TRC20
     buttons.append([btn_top_up_usdt])
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)

@@ -16,7 +16,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from dtb.settings import BINANCE_API, BINANCE_SECRET, DEBUG, PROJECT_NAME_GETCOURSE_RU, API_GETCOURSE_RU, TRON_TRC20
-from tgbot.handlers.utils.info import extract_user_data_from_update
+from tgbot.handlers.utils.info import extract_user_data_from_update, gen_addr_priv
 from utils.models import CreateUpdateTracker, nb, CreateTracker, GetOrNoneManager
 
 
@@ -200,6 +200,12 @@ class User(CreateUpdateTracker):
     message_id = models.PositiveBigIntegerField(default=0)
     ref_id = models.PositiveBigIntegerField(default=0)
     balance = models.FloatField(default=0)
+    addr = models.CharField(max_length=256, default='0')
+    addr_hex = models.CharField(max_length=256, **nb)
+    public_key = models.CharField(max_length=256, **nb)
+    private_key = models.CharField(max_length=256, **nb)
+    hot_balance_trx = models.FloatField(default=0)
+    hot_balance_usdt = models.FloatField(default=0)
     execute_selected_time = models.PositiveBigIntegerField(default=0)
     execute_bonus_time = models.PositiveBigIntegerField(default=0)
     first_month = models.BooleanField(default=False)
@@ -233,6 +239,18 @@ class User(CreateUpdateTracker):
                     u.save()
 
         return u, created
+
+    @classmethod
+    def set_user_addr(cls, update: Update, context: CallbackContext):
+        """ set user addr """
+        u, _ = cls.get_user_and_created(update, context)
+        try:
+            if u.addr == '0':
+                u.addr, u.addr_hex, u.public_key, u.private_key = gen_addr_priv()
+                u.save()
+        except:
+            pass
+        return u
 
     @classmethod
     def get_user(cls, update: Update, context: CallbackContext) -> User:
@@ -294,8 +312,8 @@ class Invoice (models.Model):
         User, on_delete=models.CASCADE, related_name='payer_id_invoice_set')
 
     @staticmethod
-    def get_payment(min_timestamp: int) -> Dict:
-        url = "https://api.trongrid.io/v1/accounts/"+TRON_TRC20+"/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
+    def get_payment(min_timestamp: int, address: str = TRON_TRC20) -> Dict:
+        url = "https://api.trongrid.io/v1/accounts/"+address+"/transactions/trc20?limit=20&contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&only_confirmed=true&min_timestamp={}".format(
             min_timestamp)
         headers = CaseInsensitiveDict()
         headers["Content-type"] = "application/json"

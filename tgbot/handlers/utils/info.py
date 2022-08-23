@@ -4,6 +4,11 @@ from typing import Dict, Callable
 import telegram
 from telegram import Update
 
+import base58
+import ecdsa
+import random
+from Crypto.Hash import keccak
+
 from io import BytesIO
 import qrcode
 from PIL import Image
@@ -66,6 +71,36 @@ def generate_qr(text: str, logo: str = 'dtb/media/tether-usdt-trc20.png'):
     data = BytesIO()
     QRimg.save(data, "PNG")
     return data
+
+def keccak256(data):
+    hasher = keccak.new(digest_bits=256)
+    hasher.update(data)
+    return hasher.digest()
+
+
+def get_signing_key(raw_priv):
+    return ecdsa.SigningKey.from_string(raw_priv, curve=ecdsa.SECP256k1)
+
+
+def verifying_key_to_addr(key):
+    pub_key = key.to_string()
+    primitive_addr = b'\x41' + keccak256(pub_key)[-20:]
+    # 0 (zero), O (capital o), I (capital i) and l (lower case L)
+    addr = base58.b58encode_check(primitive_addr)
+    return addr
+
+
+def gen_addr_priv():
+    raw = bytes(random.sample(range(0, 256), 32))
+    # raw = bytes.fromhex('a0a7acc6256c3..........b9d7ec23e0e01598d152')
+    key = get_signing_key(raw)
+    addr = verifying_key_to_addr(key.get_verifying_key()).decode()
+    addr_hex = base58.b58decode_check(addr.encode()).hex()
+    public_key = key.get_verifying_key().to_string().hex()
+    private_key = raw.hex()
+
+    return addr, addr_hex, public_key, private_key
+    
 
 def send_typing_action(func: Callable):
     """Sends typing action while processing func command."""

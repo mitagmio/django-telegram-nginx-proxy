@@ -18,7 +18,7 @@ from dtb.settings import BINANCE_API, BINANCE_SECRET
 
 
 def message_handler_func(update: Update, context: CallbackContext):
-    # print(update)
+    print(update)
     if (hasattr(update, 'message') and update.message != None and update.message.chat.id != -1001796561677) or (hasattr(update, 'channel_post') and update.channel_post != None and update.channel_post.chat.id != -1001695923729):
         u = User.get_user(update, context)
         if u.state in State_Dict:
@@ -230,6 +230,20 @@ def cmd_wallet(update: Update, context: CallbackContext):
             u.message_id = id.message_id
             u.save()
     del_mes(update, context, True)
+
+# Кнопка пополнения мультикошельков USDT TRC20 
+
+def cmd_top_up_multi_wallet_usdt(update: Update, context: CallbackContext):
+    u = User.set_user_addr(update, context)
+    message = get_message_bot(update)
+    if check_username(update, context):
+        if check_email(update, context):
+            id = context.bot.send_photo(
+                chat_id=message.chat.id, photo=generate_qr(u.addr).getvalue(), caption=static_text.MULTI_WALLET.format(addr=u.addr), reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
+            u.message_id = id.message_id
+            u.save()
+    del_mes(update, context, True)
+
 
 # Кнопка пополнения USDT TRC20 
 
@@ -550,6 +564,7 @@ Menu_Dict = {
     'Меню': cmd_menu,
     'Кошелек': cmd_wallet,
     'Почта': chenge_email,
+    'Пополнить_Кошелек': cmd_top_up_multi_wallet_usdt,
     'Пополнить_Кошелек_TRC20':cmd_top_up_wallet_usdt,
     'Удалить_invoice':cmd_del_invoice_trc20,
     'Академия': cmd_academy,

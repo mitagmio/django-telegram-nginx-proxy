@@ -8,13 +8,17 @@ from typing import Union, List, Optional, Dict
 
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from tgbot.models import P2p, User, Terms, Invoice
+from tgbot.models import P2p, User, Terms, Invoice, Settings
 
 from dtb.celery import app
 from celery.utils.log import get_task_logger
-from dtb.settings import TELEGRAM_LOGS_CHAT_ID
+from dtb.settings import TELEGRAM_LOGS_CHAT_ID, TRON_TRC20
 from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
     _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins
+
+from tronpy import Tron
+from tronpy.keys import PrivateKey
+from tronpy.providers import HTTPProvider
 
 logger = get_task_logger(__name__)
 
@@ -108,6 +112,172 @@ def invoices() -> None:
             )
             time.sleep(0.1)
     logger.info("Sending invoices was completed!")
+
+@app.task(ignore_result=True)
+def payment_multi() -> None:
+    """ Подтверждаем оплату по выставленным счетам  """
+    logger.info("Starting payment invoices")
+    settings = Settings.objects.get(id=1)
+    timeblock = 0
+    Users = User.objects.exclude(addr='0')
+    logger.info(
+        f"min_timestamp {int(settings.last_time_payment)}")
+    try:
+        client = Tron(provider=HTTPProvider(api_key=[settings.key1, settings.key2, settings.key3]), network='mainnet')
+        contract = client.get_contract('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t') #usdt
+    except Exception as e:
+        print('Error Client or Contract', e)
+        pass
+    for u in Users:
+        try:
+            print(u.username, u.addr)
+            Transactions = Invoice.get_payment(
+                int(settings.last_time_payment),
+                str(u.addr)
+                )['data']
+            logger.info(
+                f"Transactions {Transactions}")
+        except Exception as e:
+            Transactions = dict()
+            logger.info(
+                f"Transactions {len(Transactions)}, reason: {e}")
+        if len(Transactions) > 0:
+
+            for t in Transactions:
+                if int(t['block_timestamp']) > timeblock:
+                    timeblock = int(t['block_timestamp'])
+                pay_value = float(0.0)
+                if t['to'] == str(u.addr) and t['token_info']['symbol']=='USDT':
+                    pay_value = float(t['value']) / \
+                        10**float(t['token_info']['decimals'])
+
+                # try:
+                #     inv = Invoice.objects.get(summ_invoice=pay_value)
+                # except Invoice.DoesNotExist:
+                #     inv = None
+                # if inv != None:
+                    # u = inv.payer_id
+                if pay_value > 0 :
+                    bal_before = u.balance
+                    u.balance += pay_value
+                    text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
+                        pay_value, u.balance)
+                    _send_message(
+                        user_id=u.user_id,
+                        text=text,
+                        entities=None,
+                        parse_mode=telegram.ParseMode.HTML,
+                        reply_markup=None,
+                    )
+                    time.sleep(0.5)
+                    bal_after = u.balance
+                    log_text = f"Invoice payment success {pay_value},Adr {u.addr}, User {u}, id {u.user_id}, bal_before {bal_before}"
+                    _send_message(
+                        user_id=TELEGRAM_LOGS_CHAT_ID,
+                        text=log_text+f", bal_after {bal_after} ",
+                        entities=None,
+                        parse_mode=telegram.ParseMode.HTML,
+                        reply_markup=None,
+                    )
+                    # inv.delete()
+                u.hot_balance_usdt += pay_value # contract.functions.balanceOf(str(u.addr))/10**float(contract.functions.decimals())
+                if u.hot_balance_usdt >= 100:
+                    try:
+                        u.hot_balance_trx = float(client.get_account_balance(str(u.addr)))
+                        time.sleep(1.5)
+                        if u.hot_balance_trx > 0 and u.hot_balance_trx < 20:
+                            fee = float(20 - u.hot_balance_trx)
+                    except Exception as e:
+                        print('Error Get balance TRX', e)
+                        fee = float(20)
+        
+                    if u.hot_balance_trx == 0:
+                        fee = float(20)
+
+                    if u.hot_balance_trx >= 20:
+                        fee = 0
+                    try:
+                        if fee > 0:    
+                            giver = User.objects.get(user_id=352482305)
+                            priv_key = PrivateKey(bytes.fromhex(giver.private_key))
+                            txn = (
+                                client.trx.transfer(giver.addr, u.addr, int(fee*1000000))
+                                .build()
+                                .sign(priv_key)
+                            )
+                            txn.broadcast().wait(timeout=60, interval=1.8)
+                            u.hot_balance_trx += fee
+                    except Exception as e:
+                        print('Error Send TRX from giver wallet', e)
+
+                    # try:        
+                    #     if fee == 0:
+                    #         priv_key = PrivateKey(bytes.fromhex(u.private_key))
+                    #         txn = (
+                    #             contract.functions.transfer('THKqtdfNBxqkSwzLTV9JMANgW9p1uZBDN4', int(pay_value*1000000))
+                    #             .with_owner(u.addr) # address of the private key
+                    #             .fee_limit(20_000_000)
+                    #             .build()
+                    #             .sign(priv_key)
+                    #         )
+                    #         txn.broadcast().wait(timeout=60, interval=1.8)
+                    # except Exception as e:
+                    #     print('Error Send to treasure wallet', e)
+            u.save()
+        time.sleep(1.5)
+    if timeblock > settings.last_time_payment:
+        settings.last_time_payment = timeblock + 1000
+        settings.save()
+    logger.info("Payment invoices was completed!")
+
+
+@app.task(ignore_result=True)
+def send_to_treasure() -> None:
+    """ Отправляем в хранилище  """
+    logger.info("Starting send to treasure")
+    Users = User.objects.filter(hot_balance_trx__gt=0).filter(hot_balance_usdt__gt=0)
+    try:
+        len_u = len(Users)
+    except:
+        len_u = 0
+    if len_u > 0:
+        settings = Settings.objects.get(id=1)
+        try:
+            client = Tron(provider=HTTPProvider(api_key=[settings.key1, settings.key2, settings.key3]), network='mainnet')
+            contract = client.get_contract('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t') #usdt
+        except Exception as e:
+            print('Error Client or Contract', e)
+            pass
+        for u in Users:
+            try:
+                priv_key = PrivateKey(bytes.fromhex(u.private_key))
+                txn = (
+                    contract.functions.transfer(TRON_TRC20, int(u.hot_balance_usdt*1000000))
+                    .with_owner(u.addr) # address of the private key
+                    .fee_limit(20_000_000)
+                    .build()
+                    .sign(priv_key)
+                )
+                txn.broadcast().wait(timeout=60, interval=1.8)
+                u.hot_balance_usdt = 0
+                time.sleep(2)
+                u.hot_balance_trx = float(client.get_account_balance(str(u.addr)))
+            except Exception as e:
+                print('Error Send to treasure wallet', e)
+                pass
+            u.save()
+        giver = User.objects.get(user_id=352482305)
+        giver.hot_balance_trx = float(client.get_account_balance(str(giver.addr)))
+        giver.save()
+        if giver.hot_balance_trx <= 200:
+            _send_message(
+                user_id=352482305,
+                text='💵 TRX для комиссии осталось меньше чем на 10 переводов. Пополни пожалуйста TRX на кошелек {giver.addr} для перевода средств в Катину сокровищницу.',
+                entities=None,
+                parse_mode=telegram.ParseMode.HTML,
+                reply_markup=None,
+            )
+    logger.info("Send to treasure was completed!")
 
 
 @app.task(ignore_result=True)
