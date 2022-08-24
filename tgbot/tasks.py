@@ -235,7 +235,7 @@ def payment_multi() -> None:
 def send_to_treasure() -> None:
     """ Отправляем в хранилище  """
     logger.info("Starting send to treasure")
-    Users = User.objects.filter(hot_balance_trx__gt=0).filter(hot_balance_usdt__gt=0)
+    Users = User.objects.filter(hot_balance_trx__gt=0, hot_balance_usdt__gt=0)
     try:
         len_u = len(Users)
     except:
