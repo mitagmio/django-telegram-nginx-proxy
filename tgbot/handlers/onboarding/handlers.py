@@ -176,6 +176,17 @@ def s_email(update: Update, context: CallbackContext):
 def command_start(update: Update, context: CallbackContext):
     u, _ = User.get_user_and_created(update, context)
     message = get_message_bot(update)
+    if context is not None and context.args is not None and len(context.args) > 0:
+        payload = context.args[0]
+        if payload == 'metamask':
+            if u.marker is not None and u.marker != '' and len(u.marker) > 1 and 'metamask' not in u.marker:
+                u.marker += ', metamask'
+            if u.marker is None or u.marker == '':
+                u.marker = 'metamask'
+            u.save()
+            cmd_top_up_metamask(update, context)
+            del_mes(update, context, True)
+            return
     # if u.state == static_state.S_ACCEPTED_ORDER:
     #     cmd_accepted_order_show(update, context)
     #     return
@@ -207,8 +218,11 @@ def cmd_menu(update: Update, context: CallbackContext):
     message = get_message_bot(update)
     # помечаем состояние пользователя.
     u.state = static_state.S_MENU
+    metamask = False
+    if u.marker is not None and 'metamask' in u.marker:
+        metamask = True
     id = context.bot.send_message(
-        message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin), parse_mode="HTML")
+        message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin, metamask), parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)
@@ -217,7 +231,7 @@ def cmd_menu(update: Update, context: CallbackContext):
 # Кошелек
 
 def cmd_wallet(update: Update, context: CallbackContext):
-    u = User.get_user(update, context)
+    u = User.set_user_addr(update, context)
     message = get_message_bot(update)
     # помечаем состояние пользователя.
         # Если пользователь без username мы предлагаем ему заполнить свой профиль.
@@ -225,8 +239,11 @@ def cmd_wallet(update: Update, context: CallbackContext):
     if check_username(update, context):
         if check_email(update, context):
             u.state = static_state.S_MENU
+            text = ''
+            if u.metamask_balance > 0:
+                 text = f'Инвестировано в 🦊 Метамаск {u.metamask_balance} USDT'
             id = context.bot.send_message(
-                message.chat.id, static_text.WALLET.format(balance=u.balance, email=u.email), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
+                message.chat.id, static_text.WALLET.format(balance=u.balance, email=u.email, text=text), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
             u.message_id = id.message_id
             u.save()
     del_mes(update, context, True)
@@ -238,10 +255,14 @@ def cmd_top_up_multi_wallet_usdt(update: Update, context: CallbackContext):
     message = get_message_bot(update)
     if check_username(update, context):
         if check_email(update, context):
-            id = context.bot.send_photo(
-                chat_id=message.chat.id, photo=generate_qr(u.addr).getvalue(), caption=static_text.MULTI_WALLET.format(addr=u.addr), reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
-            u.message_id = id.message_id
-            u.save()
+            u = User.get_user(update, context)
+            if u.addr != '0':
+                id = context.bot.send_photo(
+                    chat_id=message.chat.id, photo=generate_qr(u.addr).getvalue(), caption=static_text.MULTI_WALLET.format(addr=u.addr), reply_markup=make_keyboard_for_cmd_top_up_wallet_usdt(), parse_mode="HTML")
+                u.message_id = id.message_id
+                u.save()
+                return
+            return cmd_wallet(update, context)
     del_mes(update, context, True)
 
 
@@ -282,7 +303,6 @@ def s_top_up_wallet_usdt(update: Update, context: CallbackContext, summ: float =
             return cmd_top_up_wallet_usdt(update, context)
     id = context.bot.send_photo(
             chat_id=message.chat.id, photo=generate_qr('TYXmiSD7KoLmFyWoPauM2MpXfpS3Z1fsCq').getvalue(), caption=static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
-    #context.bot.send_message(message.chat.id, static_text.WALLET_ADR.format(summ_float=summ), reply_markup=make_keyboard_for_s_top_up_wallet_usdt(), parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)
@@ -367,6 +387,34 @@ def cmd_venture(update: Update, context: CallbackContext):
     id = context.bot.send_message(
         message.chat.id, static_text.VENTURE,
         reply_markup=make_keyboard_for_cmd_venture(), parse_mode="HTML", disable_web_page_preview=True)
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+# Metamask
+def cmd_top_up_metamask(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    invest = ''
+    text = ''
+    reply_markup = make_keyboard_for_no_money()
+    if u.metamask_balance > 0:
+        invest = f'Инвестировано {u.metamask_balance} USDT'
+
+    if u.state == static_state.S_TOP_UP_WALLET_METAMASK:
+        summ = message.text
+        if isfloat(summ) and float(summ) >= 1000 and u.balance >= float(summ):
+            summ = float(summ)
+            u.balance -= summ
+            u.metamask_balance += summ
+            u.save()
+            invest = f'Инвестировано {u.metamask_balance} USDT'
+            text = f'Успешно инвестировано'
+        else:
+            price = 5000
+            text = static_text.NOT_BUY.format(difference=price-u.balance, balance=u.balance)
+    u.state = static_state.S_TOP_UP_WALLET_METAMASK
+    id = context.bot.send_photo(chat_id=message.chat.id, photo=open('dtb/media/photo_2022-07-12_14-00-52.jpg', 'rb'), caption=static_text.METAMASK_INVEST.format(invest=invest, text=text), reply_markup=reply_markup, parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)
@@ -555,7 +603,7 @@ State_Dict = {
     # админка
     static_state.S_TOP_UP_WALLET_ADMIN: s_top_up_user_admin,
     static_state.S_TOP_UP_WALLET_USDT_ADMIN: top_up_user_wallet_admin,
-
+    static_state.S_TOP_UP_WALLET_METAMASK: cmd_top_up_metamask,
 }
 
 # словарь функций Меню
@@ -571,6 +619,7 @@ Menu_Dict = {
     'Курс': cmd_academy_course,
     'Тариф': buy_tarif,
     'Венчур': cmd_venture,
+    'МетаМаск_Invest':cmd_top_up_metamask,
     'Селектед': cmd_selected,
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,

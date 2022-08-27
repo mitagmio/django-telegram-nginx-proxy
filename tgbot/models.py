@@ -218,6 +218,8 @@ class User(CreateUpdateTracker):
     email = models.CharField(max_length=256, **nb)
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
+    marker = models.CharField(max_length=256, **nb)
+    metamask_balance = models.FloatField(default=0)
 
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'
