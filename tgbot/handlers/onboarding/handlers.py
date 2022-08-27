@@ -397,7 +397,7 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
     message = get_message_bot(update)
     invest = ''
     text = ''
-    reply_markup = make_keyboard_for_no_money()
+    reply_markup = make_keyboard_for_cmd_help()
     if u.metamask_balance > 0:
         invest = f'Инвестировано {u.metamask_balance} USDT'
 
@@ -413,7 +413,7 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
         else:
             price = 5000
             text = static_text.NOT_BUY.format(difference=price-u.balance, balance=u.balance)
-    u.state = static_state.S_TOP_UP_WALLET_METAMASK
+    # u.state = static_state.S_TOP_UP_WALLET_METAMASK
     id = context.bot.send_photo(chat_id=message.chat.id, photo=open('dtb/media/photo_2022-07-12_14-00-52.jpg', 'rb'), caption=static_text.METAMASK_INVEST.format(invest=invest, text=text), reply_markup=reply_markup, parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
