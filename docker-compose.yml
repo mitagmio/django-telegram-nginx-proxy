@@ -9,8 +9,8 @@ services:
     restart: always
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - .:/code
       - ./dtb/static:/static
@@ -36,8 +36,8 @@ services:
     restart: always
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -51,8 +51,8 @@ services:
     restart: always
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
   nginx-proxy:
     container_name: nginx-proxy
     build: nginx
@@ -63,8 +63,8 @@ services:
       - 80:80
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - ./dtb/static:/static
       - ./dtb/media:/media
@@ -80,8 +80,8 @@ services:
       - ./.env_letsencrypt
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
@@ -96,8 +96,8 @@ services:
     command: celery -A dtb worker --loglevel=INFO
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - .:/code
     env_file:
@@ -112,8 +112,8 @@ services:
     command: celery -A dtb beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler
     logging:
       options:
-        max-size: "10m"
-        max-file: "10"
+        max-size: "100m"
+        max-file: "100"
     volumes:
       - .:/code
     env_file:
