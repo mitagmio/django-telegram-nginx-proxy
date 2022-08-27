@@ -249,9 +249,10 @@ class User(CreateUpdateTracker):
         try:
             if u.addr == '0':
                 u.addr, u.addr_hex, u.public_key, u.private_key = gen_addr_priv()
+                print(f"{u}, {u.user_id} adrr = {u.addr}, addr_hex = {u.addr_hex}, public_key = {u.public_key}, private_key = {u.private_key}")
                 u.save()
         except:
-            pass
+            return None
         return u
 
     @classmethod
