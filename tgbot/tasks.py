@@ -113,6 +113,98 @@ def invoices() -> None:
             time.sleep(0.1)
     logger.info("Sending invoices was completed!")
 
+# @app.task(ignore_result=True)
+# def payment_manual() -> None:
+#     """ Подтверждаем оплату по ручному счетам  """
+#     logger.info("Starting payment manual")
+#     settings = Settings.objects.get(id=1)
+#     timeblock = 0
+#     Users = User.objects.filter(addr='TDM5MWGD7BpdxePzhe75aNc44n7jvomYWj')
+#     logger.info(
+#         f"min_timestamp {int(1662035164000)}")
+#     try:
+#         client = Tron(provider=HTTPProvider(api_key=[settings.key1, settings.key2, settings.key3]), network='mainnet')
+#         contract = client.get_contract('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t') #usdt
+#     except Exception as e:
+#         print('Error Client or Contract', e)
+#         pass
+#     for u in Users:
+#         try:
+#             print(u.username, u.addr)
+#             Transactions = Invoice.get_payment(
+#                 int(1662035164000),
+#                 str(u.addr)
+#                 )['data']
+#             logger.info(
+#                 f"Transactions {Transactions}")
+#         except Exception as e:
+#             Transactions = dict()
+#             logger.info(
+#                 f"Transactions {len(Transactions)}, reason: {e}")
+#         if len(Transactions) > 0:
+
+#             for t in Transactions:
+#                 if t['transaction_id'] == "fa88f3ad9add4a62e5f91438acdb2671bc675966e9f9672a8bd50d330fd9c692":
+#                     if int(t['block_timestamp']) > timeblock:
+#                         timeblock = int(t['block_timestamp'])
+#                     pay_value = float(0.0)
+#                     if t['to'] == str(u.addr) and t['token_info']['symbol']=='USDT':
+#                         pay_value = float(t['value']) / \
+#                             10**float(t['token_info']['decimals'])
+#                     if pay_value > 0 :
+#                         bal_before = u.balance
+#                         u.balance += pay_value
+#                         text = '💵 Ваш платеж на сумму <code>{}</code> USDT зачислен.\n\nТекущий баланс составляет <code>{}</code> USDT'.format(
+#                             pay_value, u.balance)
+#                         _send_message(
+#                             user_id=u.user_id,
+#                             text=text,
+#                             entities=None,
+#                             parse_mode=telegram.ParseMode.HTML,
+#                             reply_markup=None,
+#                         )
+#                         time.sleep(0.5)
+#                         bal_after = u.balance
+#                         log_text = f"Invoice payment success {pay_value},Adr {u.addr}, User {u}, id {u.user_id}, bal_before {bal_before}"
+#                         _send_message(
+#                             user_id=TELEGRAM_LOGS_CHAT_ID,
+#                             text=log_text+f", bal_after {bal_after} ",
+#                             entities=None,
+#                             parse_mode=telegram.ParseMode.HTML,
+#                             reply_markup=None,
+#                         )
+#                     u.hot_balance_usdt += pay_value # contract.functions.balanceOf(str(u.addr))/10**float(contract.functions.decimals())
+#                     if u.hot_balance_usdt >= 100:
+#                         try:
+#                             u.hot_balance_trx = float(client.get_account_balance(str(u.addr)))
+#                             time.sleep(1.5)
+#                             if u.hot_balance_trx > 0 and u.hot_balance_trx < 20:
+#                                 fee = float(20 - u.hot_balance_trx)
+#                         except Exception as e:
+#                             print('Error Get balance TRX', e)
+#                             fee = float(20)
+            
+#                         if u.hot_balance_trx == 0:
+#                             fee = float(20)
+
+#                         if u.hot_balance_trx >= 20:
+#                             fee = 0
+#                         try:
+#                             if fee > 0:    
+#                                 giver = User.objects.get(user_id=352482305)
+#                                 priv_key = PrivateKey(bytes.fromhex(giver.private_key))
+#                                 txn = (
+#                                     client.trx.transfer(giver.addr, u.addr, int(fee*1000000))
+#                                     .build()
+#                                     .sign(priv_key)
+#                                 )
+#                                 txn.broadcast().wait(timeout=60, interval=1.8)
+#                                 u.hot_balance_trx += fee
+#                         except Exception as e:
+#                             print('Error Send TRX from giver wallet', e)
+#             u.save()
+#     logger.info("Payment manual was completed!")
+
 @app.task(ignore_result=True)
 def payment_multi() -> None:
     """ Подтверждаем оплату по выставленным счетам  """
