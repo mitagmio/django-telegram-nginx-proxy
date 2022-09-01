@@ -455,7 +455,7 @@ def buy_selected(update: Update, context: CallbackContext):
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= price
-            if timestamp < 1661990400:
+            if timestamp < 1662079200:
                 u.first_month = True
                 u.bonus_programm = 'first_month'
             if timestamp < u.execute_selected_time:
