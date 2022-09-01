@@ -423,11 +423,11 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
+    timestamp = int(datetime.datetime.today().timestamp())
     if timestamp > 1662068400 and u.bonus_programm != 'first_month':
         reply_markup = make_keyboard_for_cmd_selected_90()
     else:
-        reply_markup = make_keyboard_for_cmd_selected()
-    timestamp = int(datetime.datetime.today().timestamp())
+        reply_markup = make_keyboard_for_cmd_selected() 
     if u.execute_selected_time > timestamp:
         execute_selected_time = u.execute_selected_time
         time_string_format = '‼️ Доступ заканчивается: ' + str(datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M'))
