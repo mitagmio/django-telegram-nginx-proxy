@@ -147,11 +147,27 @@ def make_keyboard_for_cmd_selected() -> InlineKeyboardMarkup:
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
     btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
     btn_top_up_usdt = InlineKeyboardButton(
-            text='💸 Купить доступ 100$', callback_data='Купить_Селектед')
+            text='💸 Купить доступ на 30д', callback_data='Купить_Селектед')
     btn_about_selected = InlineKeyboardButton(
             text='⁉️ О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
     buttons.append([btn_about_selected])
     buttons.append([btn_top_up_usdt])
+    buttons.append([btn_main, btn_back])
+    return InlineKeyboardMarkup(buttons)
+
+def make_keyboard_for_cmd_selected_90() -> InlineKeyboardMarkup:
+    buttons = []
+    btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
+    btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
+    btn_top_up_usdt = InlineKeyboardButton(
+            text='💸 Купить доступ на 30д', callback_data='Купить_Селектед')
+    btn_top_up_usdt_90 = InlineKeyboardButton(
+            text='💸 Купить доступ на 90д', callback_data='Купить_Селектед_90')
+    btn_about_selected = InlineKeyboardButton(
+            text='⁉️ О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
+    buttons.append([btn_about_selected])
+    buttons.append([btn_top_up_usdt])
+    buttons.append([btn_top_up_usdt_90])
     buttons.append([btn_main, btn_back])
     return InlineKeyboardMarkup(buttons)
 

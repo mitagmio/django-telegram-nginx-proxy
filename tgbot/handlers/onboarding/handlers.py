@@ -423,7 +423,10 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
-    reply_markup = make_keyboard_for_cmd_selected()
+    if timestamp > 1662068400 and u.bonus_programm != 'first_month':
+        reply_markup = make_keyboard_for_cmd_selected_90()
+    else:
+        reply_markup = make_keyboard_for_cmd_selected()
     timestamp = int(datetime.datetime.today().timestamp())
     if u.execute_selected_time > timestamp:
         execute_selected_time = u.execute_selected_time
@@ -450,12 +453,14 @@ def buy_selected(update: Update, context: CallbackContext):
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
         price = 100
+        if timestamp > 1662068400:
+            price = 150
         if u.bonus_programm == 'first_month':
             price = 100
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= price
-            if timestamp < 1662079200:
+            if timestamp < 1662068400:
                 u.first_month = True
                 u.bonus_programm = 'first_month'
             if timestamp < u.execute_selected_time:
@@ -484,6 +489,47 @@ def buy_selected(update: Update, context: CallbackContext):
         u.message_id = id.message_id
         u.save()
     del_mes(update, context, True)
+
+
+def buy_selected_90(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+
+    if check_email(update, context):
+        timestamp = int(datetime.datetime.today().timestamp())
+        price = 400
+        if u.bonus_programm == 'first_month':
+            price = 300
+        if u.balance >= price:
+            reply_markup = make_keyboard_for_cmd_help()
+            u.balance -= price
+            if timestamp < u.execute_selected_time:
+                u.execute_selected_time += 60 * 60 * 24 * 90
+                execute_selected_time = u.execute_selected_time
+                time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
+                text = static_text.BUY_SELECTED_TOP_UP.format(end_date='‼️ Доступ заканчивается: ' + str(time_string_format))
+            else:
+                execute_selected_time = timestamp + 60 * 60 * 24 * 90
+                time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
+                u.execute_selected_time = execute_selected_time
+                # link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=execute_selected_time, member_limit=1).invite_link
+                link_channel = context.bot.create_chat_invite_link(chat_id=-1001695923729, expire_date=timestamp + 60 * 60 * 24, member_limit=1).invite_link
+                # print('link_chat',link_chat)
+                print('link_channel',link_channel)
+                text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
+            u.execute_bonus_time = 0
+            u.remind = True
+            u.save()
+        else:
+            text = static_text.NOT_BUY.format(difference=price-u.balance, balance=u.balance)
+            reply_markup = make_keyboard_for_no_money()
+        id = context.bot.send_message(
+                message.chat.id, text,
+                reply_markup=reply_markup, parse_mode="HTML")
+        u.message_id = id.message_id
+        u.save()
+    del_mes(update, context, True)
+
 
 ###################################
 ###################################
@@ -623,6 +669,7 @@ Menu_Dict = {
     'Селектед': cmd_selected,
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
+    'Купить_Селектед_90': buy_selected_90,
     'Не_напоминать': not_remind,
     'Администрирование': cmd_admin,
     'Пополнить_пользователю': cmd_top_up_user_admin,
