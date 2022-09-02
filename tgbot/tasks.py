@@ -466,7 +466,7 @@ def kick_selected() -> None:
                 chat_id=channel_id
             )
             if u.bonus_programm == 'first_month':
-               u.execute_bonus_time += timestamp + (60 * 60 * 24 * 7)
+               u.execute_bonus_time = timestamp + (60 * 60 * 24 * 7)
             u.save()
     logger.info("Selected kicked users was completed!")
 
@@ -504,20 +504,71 @@ def kick_selected_all() -> None:
             u.save()
     logger.info("Selected kicked all users was completed!")
 
+
+# @app.task(ignore_result=True)
+# def send_invoice_selected_manual() -> None:
+#     """ Напоминаем пользователям из selected """
+#     logger.info("Starting remind Selected users")
+#     timestamp_strart = int((datetime.today() + timedelta(days=7)).timestamp())
+#     timestamp_end = int((datetime.today() + timedelta(days=6)).timestamp())
+#     logger.info(
+#         f"timestamp {int(timestamp_strart)}")
+#     try:
+#         channel_id = -1001695923729
+#         admin_ids = _get_admins(chat_id=channel_id)
+#         Users = User.objects.filter(execute_bonus_time__gt=0).exclude(user_id__in=admin_ids)
+
+#         logger.info(
+#              f"Users len{len(Users)}, data {Users}")
+#     except Exception as e:
+#         Users = dict()
+#         admin_ids = []
+#         logger.info(
+#             f"Users {len(Users)}, reason: {e}")
+#     if len(Users) > 0:
+#         bts = [
+#             [
+#                 {'text': '💸 Продлить доступ', 'callback_data': 'Купить_Селектед'},
+#                 {'text': '💢 Не напоминать', 'callback_data': 'Не_напоминать'}
+#             ],
+#             [
+#                 {'text':'⏮ В начало', 'callback_data':'Старт'},
+#                 {'text':'⏪ Назад', 'callback_data':'Меню'}
+#             ]
+#         ]
+#         for u in Users:
+#             if u.remind == True:
+#                 broadcast_message(
+#                     user_ids=[u.user_id],
+#                     text='Доброе утро.\n\nУ вас недавно закончилась подписка на SELECTED. За вами ещё три дня будет закреплена пониженная цена 100$/мес. Если планируете продлевать, нажмите кнопку "💸 Продлить доступ".\n\nСпасибо.',
+#                     entities = None,
+#                     reply_markup = bts, #Optional[List[List[Dict]]]
+#                     sleep_between = 0.4,
+#                     parse_mode=telegram.ParseMode.HTML,
+#                 )
+#                 try:
+#                     _del_message(u.user_id, u.message_id)
+#                 except:
+#                     pass
+#                 pass
+#     logger.info("Selected users remind was completed!")
+
+
 @app.task(ignore_result=True)
 def send_invoice_7_selected() -> None:
     """ Напоминаем пользователям из selected """
     logger.info("Starting remind Selected users")
-    timestamp = int((datetime.today() + timedelta(days=7)).timestamp())
+    timestamp_strart = int((datetime.today() + timedelta(days=7)).timestamp())
+    timestamp_end = int((datetime.today() + timedelta(days=6)).timestamp())
     logger.info(
-        f"timestamp {int(timestamp)}")
+        f"timestamp {int(timestamp_strart)}")
     try:
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
-        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp_strart, execute_selected_time__gt=timestamp_end).exclude(user_id__in=admin_ids)
 
-        # logger.info(
-        #     f"Users {Users}")
+        logger.info(
+             f"Users len{len(Users)}, data {Users}")
     except Exception as e:
         Users = dict()
         admin_ids = []
@@ -538,33 +589,34 @@ def send_invoice_7_selected() -> None:
             if u.remind == True:
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="""
-Через 7 дней закончится доступ в SELECTED.
-
-Продлить доступ или не напоминать?
-""",
+                    text="Через 7 дней закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
                     parse_mode=telegram.ParseMode.HTML,
                 )
-                _del_message(u.user_id, u.message_id)
+                try:
+                    _del_message(u.user_id, u.message_id)
+                except:
+                    pass
+                pass
     logger.info("Selected users remind was completed!")
 
 @app.task(ignore_result=True)
 def send_invoice_3_selected() -> None:
     """ Напоминаем пользователям из selected """
     logger.info("Starting remind Selected users")
-    timestamp = int((datetime.today() + timedelta(days=3)).timestamp())
+    timestamp_strart = int((datetime.today() + timedelta(days=3)).timestamp())
+    timestamp_end = int((datetime.today() + timedelta(days=2)).timestamp())
     logger.info(
-        f"timestamp {int(timestamp)}")
+        f"timestamp {int(timestamp_strart)}")
     try:
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
-        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp_strart, execute_selected_time__gt=timestamp_end).exclude(user_id__in=admin_ids)
 
-        # logger.info(
-        #     f"Users {Users}")
+        logger.info(
+             f"Users len{len(Users)}, data {Users}")
     except Exception as e:
         Users = dict()
         admin_ids = []
@@ -585,17 +637,17 @@ def send_invoice_3_selected() -> None:
             if u.remind == True:
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="""
-Через 3 дня закончится доступ в SELECTED.
-
-Продлить доступ или не напоминать?
-""",
+                    text="Через 3 дня закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
                     parse_mode=telegram.ParseMode.HTML,
                 )
-                _del_message(u.user_id, u.message_id)
+                try:
+                    _del_message(u.user_id, u.message_id)
+                except:
+                    pass
+                pass
     logger.info("Selected users remind was completed!")
 
 @app.task(ignore_result=True)
@@ -608,10 +660,10 @@ def send_invoice_1_selected() -> None:
     try:
         channel_id = -1001695923729
         admin_ids = _get_admins(chat_id=channel_id)
-        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
+        Users = User.objects.filter(execute_selected_time__lte=timestamp, execute_selected_time__gt=100).exclude(user_id__in=admin_ids)
 
-        # logger.info(
-        #     f"Users {Users}")
+        logger.info(
+             f"Users len{len(Users)}, data {Users}")
     except Exception as e:
         Users = dict()
         admin_ids = []
@@ -632,17 +684,17 @@ def send_invoice_1_selected() -> None:
             if u.remind == True:
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="""
-Через 1 днень закончится доступ в SELECTED.
-
-Продлить доступ или не напоминать?
-""",
+                    text="Через 1 днень закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
                     parse_mode=telegram.ParseMode.HTML,
                 )
-                _del_message(u.user_id, u.message_id)
+                try:
+                    _del_message(u.user_id, u.message_id)
+                except:
+                    pass
+                pass
     logger.info("Selected users remind was completed!")
 
 @app.task(ignore_result=True)
