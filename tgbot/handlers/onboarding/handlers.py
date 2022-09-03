@@ -515,7 +515,7 @@ def buy_selected_90(update: Update, context: CallbackContext):
                 # link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=execute_selected_time, member_limit=1).invite_link
                 link_channel = context.bot.create_chat_invite_link(chat_id=-1001695923729, expire_date=timestamp + 60 * 60 * 24, member_limit=1).invite_link
                 # print('link_chat',link_chat)
-                print('User:',u,'link_channel',link_channel)
+                print(f'User:{u}','link_channel',link_channel)
                 text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
             u.execute_bonus_time = 0
             u.remind = True
