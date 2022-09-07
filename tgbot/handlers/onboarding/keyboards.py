@@ -52,7 +52,7 @@ def make_keyboard_for_cmd_menu(adm, metamask = False) -> InlineKeyboardMarkup:
         buttons.append([btn_academy])
         if metamask:
             btn_metamask = InlineKeyboardButton(
-                text='🦊 Metamask', callback_data="МетаМаск_Invest")
+                text='🦊 Metamask', url="https://t.me/kostevich_VC/123")#callback_data="МетаМаск_Invest")
             buttons.append([btn_metamask])
         if adm:
             btn_admin = InlineKeyboardButton(
@@ -149,7 +149,7 @@ def make_keyboard_for_cmd_selected() -> InlineKeyboardMarkup:
     btn_top_up_usdt = InlineKeyboardButton(
             text='💸 Купить доступ на 30д', callback_data='Купить_Селектед')
     btn_about_selected = InlineKeyboardButton(
-            text='⁉️ О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
+            text='👩🏼‍🏫О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
     buttons.append([btn_about_selected])
     buttons.append([btn_top_up_usdt])
     buttons.append([btn_main, btn_back])
@@ -164,7 +164,7 @@ def make_keyboard_for_cmd_selected_90() -> InlineKeyboardMarkup:
     btn_top_up_usdt_90 = InlineKeyboardButton(
             text='💸 Купить доступ на 90д', callback_data='Купить_Селектед_90')
     btn_about_selected = InlineKeyboardButton(
-            text='⁉️ О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
+            text='👩🏼‍🏫О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-07-26')
     buttons.append([btn_about_selected])
     buttons.append([btn_top_up_usdt])
     buttons.append([btn_top_up_usdt_90])
