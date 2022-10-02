@@ -480,6 +480,7 @@ def buy_selected(update: Update, context: CallbackContext):
             u.execute_bonus_time = 0
             u.remind = True
             u.save()
+            time.sleep(1)
         else:
             text = static_text.NOT_BUY.format(difference=price-u.balance, balance=u.balance)
             reply_markup = make_keyboard_for_no_money()
