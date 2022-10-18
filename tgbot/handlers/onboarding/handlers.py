@@ -425,7 +425,9 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 # selected
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
-    if u.marker is not None and ('selected' not in u.marker or 'first_month' not in u.marker):
+    if u.marker is not None and ('selected' in u.marker or 'first_month' in u.marker):
+        pass
+    else:
         return command_start(update, context)
     message = get_message_bot(update)
     timestamp = int(datetime.datetime.today().timestamp())
