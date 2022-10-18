@@ -742,7 +742,10 @@ def unset_bonus_programm() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            u.marker = 'selected'
+            if u.marker is not None and u.marker != '' and len(u.marker) > 1 and 'selected' not in u.marker:
+                u.marker += ', selected'
+            if u.marker is None or u.marker == '':
+                u.marker = 'selected'
             u.bonus_programm = None
             u.execute_bonus_time = 0
             u.save()
