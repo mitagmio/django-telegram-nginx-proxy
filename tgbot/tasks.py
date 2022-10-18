@@ -742,7 +742,8 @@ def unset_bonus_programm() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            u.bonus_programm = 'selected'#None
+            u.marker = 'selected'
+            u.bonus_programm = None
             u.execute_bonus_time = 0
             u.save()
     logger.info("Unset bonus was completed!")
