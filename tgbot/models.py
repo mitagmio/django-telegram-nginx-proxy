@@ -321,7 +321,8 @@ class Invoice (models.Model):
         headers = CaseInsensitiveDict()
         headers["Content-type"] = "application/json"
         r = requests.get(url, headers=headers)
-        print(f"status code = {r.status_code}")
+        if r.status_code != 200:
+            print(f"status code = {r.status_code}")
         return r.json()
 
 
