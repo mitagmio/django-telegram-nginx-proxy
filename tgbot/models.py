@@ -219,7 +219,15 @@ class User(CreateUpdateTracker):
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
     marker = models.CharField(max_length=256, **nb)
+    true_balance = models.FloatField(default=0)
+    twt_balance = models.FloatField(default=0)
+    animoca_balance = models.FloatField(default=0)
     metamask_balance = models.FloatField(default=0)
+    consensys_80_balance = models.FloatField(default=0)
+    fanzee_balance = models.FloatField(default=0)
+    kraken_36_balance = models.FloatField(default=0)
+    kraken_45_balance = models.FloatField(default=0)
+    spacex_balance = models.FloatField(default=0)
 
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'
