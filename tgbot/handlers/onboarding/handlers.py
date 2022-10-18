@@ -219,6 +219,7 @@ def cmd_menu(update: Update, context: CallbackContext):
     # помечаем состояние пользователя.
     u.state = static_state.S_MENU
     metamask = False
+    selected = False
     if u.marker is not None and 'metamask' in u.marker:
         metamask = True
     if u.marker is not None and 'selected' in u.marker:
