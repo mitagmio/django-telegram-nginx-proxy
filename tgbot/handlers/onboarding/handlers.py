@@ -221,8 +221,10 @@ def cmd_menu(update: Update, context: CallbackContext):
     metamask = False
     if u.marker is not None and 'metamask' in u.marker:
         metamask = True
+    if u.marker is not None and 'selected' in u.marker:
+        selected = True
     id = context.bot.send_message(
-        message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin, metamask), parse_mode="HTML")
+        message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin, metamask, selected), parse_mode="HTML")
     u.message_id = id.message_id
     u.save()
     del_mes(update, context, True)
@@ -422,6 +424,8 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 # selected
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
+    if u.marker is not None and ('selected' not in u.marker or 'first_month' not in u.marker):
+        return command_start(update, context)
     message = get_message_bot(update)
     timestamp = int(datetime.datetime.today().timestamp())
     if timestamp > 1662068400 and u.bonus_programm != 'first_month':
@@ -478,6 +482,10 @@ def buy_selected(update: Update, context: CallbackContext):
                 print('link_channel',link_channel)
                 text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
             u.execute_bonus_time = 0
+            if u.marker is not None and u.marker != '' and len(u.marker) > 1 and 'selected' not in u.marker:
+                u.marker += ', selected'
+            if u.marker is None or u.marker == '':
+                u.marker = 'selected'
             u.remind = True
             u.save()
             time.sleep(1)
@@ -518,6 +526,10 @@ def buy_selected_90(update: Update, context: CallbackContext):
                 # print('link_chat',link_chat)
                 print(f'User:{u}','link_channel',link_channel)
                 text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
+            if u.marker is not None and u.marker != '' and len(u.marker) > 1 and 'selected' not in u.marker:
+                u.marker += ', selected'
+            if u.marker is None or u.marker == '':
+                u.marker = 'selected'
             u.execute_bonus_time = 0
             u.remind = True
             u.save()

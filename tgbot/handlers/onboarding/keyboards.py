@@ -37,18 +37,18 @@ def make_keyboard_for_check_username() -> InlineKeyboardMarkup:
     ]]
     return InlineKeyboardMarkup(buttons)
 
-def make_keyboard_for_cmd_menu(adm, metamask = False) -> InlineKeyboardMarkup:
+def make_keyboard_for_cmd_menu(adm, metamask = False, selected = False) -> InlineKeyboardMarkup:
         buttons = []
         btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
-        btn_selected = InlineKeyboardButton(
-            text='🏵💸 Kostevich SELECTED', callback_data='Селектед')#Селектед_soon
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', callback_data='Академия')
         buttons.append([btn_vc])
-        buttons.append([btn_selected])
+        if selected:
+            btn_selected = InlineKeyboardButton(text='🏵💸 Kostevich SELECTED', callback_data='Селектед')#Селектед_soon
+            buttons.append([btn_selected])
         buttons.append([btn_academy])
         if metamask:
             btn_metamask = InlineKeyboardButton(
