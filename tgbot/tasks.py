@@ -222,19 +222,45 @@ def payment_multi() -> None:
         pass
     for u in Users:
         try:
-            print(u.username, u.addr)
+            # print(u.username, u.addr)
             Transactions = Invoice.get_payment(
                 int(settings.last_time_payment),
                 str(u.addr)
                 )['data']
-            logger.info(
-                f"Transactions {Transactions}")
+            # logger.info(f"Transactions {Transactions}")
         except Exception as e:
             Transactions = dict()
             logger.info(
-                f"Transactions {len(Transactions)}, reason: {e}")
-        if len(Transactions) > 0:
+                f"Transactions {len(Transactions)}, reason: {e}, pause 1.5 seconds and try again")
+            time.sleep(1.5)
+            try:
+                # print(u.username, u.addr)
+                Transactions = Invoice.get_payment(
+                    int(settings.last_time_payment),
+                    str(u.addr)
+                    )['data']
+                # logger.info(f"Transactions {Transactions}")
+            except Exception as e:
+                Transactions = dict()
+                logger.info(
+                    f"Transactions {len(Transactions)}, reason: {e}, pause 3 seconds and try again")
+                time.sleep(3)
+                try:
+                    # print(u.username, u.addr)
+                    Transactions = Invoice.get_payment(
+                        int(settings.last_time_payment),
+                        str(u.addr)
+                        )['data']
+                    # logger.info(f"Transactions {Transactions}")
+                except Exception as e:
+                    Transactions = dict()
+                    logger.info(
+                        f"Transactions {len(Transactions)}, reason: {e}")
 
+        if len(Transactions) > 0:
+            print(u.username, u.addr)
+            logger.info(
+                    f"Transactions {Transactions}")
             for t in Transactions:
                 if int(t['block_timestamp']) > timeblock:
                     timeblock = int(t['block_timestamp'])
@@ -316,7 +342,6 @@ def payment_multi() -> None:
                     # except Exception as e:
                     #     print('Error Send to treasure wallet', e)
             u.save()
-        time.sleep(1.5)
     if timeblock > settings.last_time_payment:
         settings.last_time_payment = timeblock + 1000
         settings.save()
@@ -717,7 +742,7 @@ def unset_bonus_programm() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            u.bonus_programm = None
+            u.bonus_programm = 'selected'#None
             u.execute_bonus_time = 0
             u.save()
     logger.info("Unset bonus was completed!")
