@@ -246,7 +246,7 @@ def cmd_wallet(update: Update, context: CallbackContext):
             if u.true_balance > 0:
                  text += f'Инвестировано {u.true_balance} USDT в 🟪 TRUE.\n\n'
             if u.twt_balance > 0:
-                 text += f'Инвестировано {u.twt_balance} USDT в 👛 Пул ликвидности TWT.\n\n'
+                 text += f'Инвестировано {u.twt_balance} TWT в 👛 Пул ликвидности TWT.\n\n'
             if u.animoca_balance > 0:
                  text += f'Инвестировано {u.animoca_balance} USDT в 🎮 Animoca brands.\n\n'
             if u.metamask_balance > 0:
@@ -495,11 +495,11 @@ def buy_selected(update: Update, context: CallbackContext):
                 execute_selected_time = timestamp + 60 * 60 * 24 * 30
                 time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
                 u.execute_selected_time = execute_selected_time
-                # link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=execute_selected_time, member_limit=1).invite_link
+                link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=timestamp + 60 * 60 * 24, member_limit=1).invite_link
                 link_channel = context.bot.create_chat_invite_link(chat_id=-1001695923729, expire_date=timestamp + 60 * 60 * 24, member_limit=1).invite_link
-                # print('link_chat',link_chat)
+                print('link_chat',link_chat)
                 print('link_channel',link_channel)
-                text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel) # link_chat=link_chat,
+                text = static_text.BUY_SELECTED.format(end_date=time_string_format, link_channel=link_channel, link_chat=link_chat) # link_chat=link_chat,
             u.execute_bonus_time = 0
             if u.marker is not None and u.marker != '' and len(u.marker) > 1 and 'selected' not in u.marker:
                 u.marker += ', selected'

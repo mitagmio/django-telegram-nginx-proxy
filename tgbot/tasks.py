@@ -14,7 +14,7 @@ from dtb.celery import app
 from celery.utils.log import get_task_logger
 from dtb.settings import TELEGRAM_LOGS_CHAT_ID, TRON_TRC20
 from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
-    _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins
+    _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins, _get_invite_chat
 
 from tronpy import Tron
 from tronpy.keys import PrivateKey
@@ -470,7 +470,9 @@ def kick_selected() -> None:
     try:
         Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=0)
         channel_id = -1001695923729
+        chat_id=-1001796561677
         admin_ids = _get_admins(chat_id=channel_id)
+        admin_chat_ids = _get_admins(chat_id=chat_id)
         # logger.info(
         #     f"Users {Users}")
     except Exception as e:
@@ -480,11 +482,12 @@ def kick_selected() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            # _kick_member(
-            #     user_id=u.user_id,
-            #     chat_id=-1001796561677
-            # )
-            # time.sleep(0.1)
+            _kick_member(
+                user_id=u.user_id,
+                admin_ids=admin_chat_ids,
+                chat_id=chat_id
+            )
+            time.sleep(0.1)
             _kick_member(
                 user_id=u.user_id,
                 admin_ids=admin_ids,
@@ -505,7 +508,9 @@ def kick_selected_all() -> None:
     try:
         Users = User.objects.filter(execute_selected_time__lt=timestamp)
         channel_id = -1001695923729
+        chat_id=-1001796561677
         admin_ids = _get_admins(chat_id=channel_id)
+        admin_chat_ids = _get_admins(chat_id=chat_id)
         # logger.info(
         #     f"Users {Users}")
     except Exception as e:
@@ -515,11 +520,12 @@ def kick_selected_all() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
-            # _kick_member(
-            #     user_id=u.user_id,
-            #     chat_id=-1001796561677
-            # )
-            # time.sleep(0.1)
+            _kick_member(
+                user_id=u.user_id,
+                admin_ids=admin_chat_ids,
+                chat_id=chat_id
+            )
+            time.sleep(0.1)
             _kick_member(
                 user_id=u.user_id,
                 admin_ids=admin_ids,
@@ -529,6 +535,41 @@ def kick_selected_all() -> None:
             u.save()
     logger.info("Selected kicked all users was completed!")
 
+@app.task(ignore_result=True)
+def send_selected_chat_manual() -> None:
+    """ Напоминаем пользователям из selected """
+    logger.info("Starting send invite Selected chat link")
+    timestamp = int(datetime.today().timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        #channel_id = -1001695923729
+        chat_id=-1001796561677
+        #admin_ids = _get_admins(chat_id=channel_id)
+        Users = User.objects.filter(execute_selected_time__gt=0)#.exclude(user_id__in=admin_ids)
+
+        logger.info(
+             f"Users len{len(Users)}, data {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        for u in Users:
+            # if u.remind == True:
+                link_chat = _get_invite_chat(chat_id=chat_id)
+                broadcast_message(
+                    user_ids=[u.user_id],
+                    text=f'Доброе день.\n\nПриглашаем Вас в SELECTED chat.\nСсылка: {link_chat}".\n\nСпасибо.',
+                    entities = None,
+                    reply_markup = None, #Optional[List[List[Dict]]]
+                    sleep_between = 0.4,
+                    parse_mode=telegram.ParseMode.HTML,
+                )
+                time.sleep(1)
+            
+    logger.info("Selected users remind was completed!")
 
 # @app.task(ignore_result=True)
 # def send_invoice_selected_manual() -> None:
