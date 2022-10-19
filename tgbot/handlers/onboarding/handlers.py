@@ -253,10 +253,12 @@ def cmd_wallet(update: Update, context: CallbackContext):
                  text += f'Инвестировано {u.metamask_balance} USDT в 🦊 ConsenSys (MetaMask), 65$ за акцию.\n\n'
             if u.consensys_80_balance > 0:
                  text += f'Инвестировано {u.consensys_80_balance} USDT в 🦊 ConsenSys (MetaMask), 80$ за акцию.\n\n'
-            if u.metamask_balance > 0:
-                 text += f'Инвестировано {u.metamask_balance} USDT в 🐙 Kraken, 36$ за акцию.\n\n'
-            if u.consensys_80_balance > 0:
-                 text += f'Инвестировано {u.consensys_80_balance} USDT в 🐙 Kraken, 45$ за акцию.\n\n'
+            if u.fanzee_balance > 0:
+                 text += f'Инвестировано {u.fanzee_balance} USDT в 🎉 Fanzee.\n\n'
+            if u.kraken_36_balance > 0:
+                 text += f'Инвестировано {u.kraken_36_balance} USDT в 🐙 Kraken, 36$ за акцию.\n\n'
+            if u.kraken_45_balance > 0:
+                 text += f'Инвестировано {u.kraken_45_balance} USDT в 🐙 Kraken, 45$ за акцию.\n\n'
             if u.spacex_balance > 0:
                  text += f'Инвестировано {u.spacex_balance} USDT в 🚀 SpaceX.\n\n'
             id = context.bot.send_message(
