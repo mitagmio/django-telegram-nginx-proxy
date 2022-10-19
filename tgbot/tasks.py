@@ -559,6 +559,8 @@ def send_selected_chat_manual() -> None:
         for u in Users:
             # if u.remind == True:
                 link_chat = _get_invite_chat(chat_id=chat_id)
+                print('username', u.username)
+                print('link_chat', link_chat)
                 broadcast_message(
                     user_ids=[u.user_id],
                     text=f'Доброе день.\n\nПриглашаем Вас в SELECTED chat.\nСсылка: {link_chat}".\n\nСпасибо.',
