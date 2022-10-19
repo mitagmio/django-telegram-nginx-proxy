@@ -243,8 +243,22 @@ def cmd_wallet(update: Update, context: CallbackContext):
         if check_email(update, context):
             u.state = static_state.S_MENU
             text = ''
+            if u.true_balance > 0:
+                 text += f'Инвестировано {u.true_balance} USDT в 🟪 TRUE.\n\n'
+            if u.twt_balance > 0:
+                 text += f'Инвестировано {u.twt_balance} USDT в 👛 Пул ликвидности TWT.\n\n'
+            if u.animoca_balance > 0:
+                 text += f'Инвестировано {u.animoca_balance} USDT в 🎮 Animoca brands.\n\n'
             if u.metamask_balance > 0:
-                 text = f'Инвестировано в 🦊 Метамаск {u.metamask_balance} USDT'
+                 text += f'Инвестировано {u.metamask_balance} USDT в 🦊 ConsenSys (MetaMask), 65$ за акцию.\n\n'
+            if u.consensys_80_balance > 0:
+                 text += f'Инвестировано {u.consensys_80_balance} USDT в 🦊 ConsenSys (MetaMask), 80$ за акцию.\n\n'
+            if u.metamask_balance > 0:
+                 text += f'Инвестировано {u.metamask_balance} USDT в 🐙 Kraken, 36$ за акцию.\n\n'
+            if u.consensys_80_balance > 0:
+                 text += f'Инвестировано {u.consensys_80_balance} USDT в 🐙 Kraken, 45$ за акцию.\n\n'
+            if u.spacex_balance > 0:
+                 text += f'Инвестировано {u.spacex_balance} USDT в 🚀 SpaceX.\n\n'
             id = context.bot.send_message(
                 message.chat.id, static_text.WALLET.format(balance=u.balance, email=u.email, text=text), reply_markup=make_keyboard_for_cmd_wallet(), parse_mode="HTML")
             u.message_id = id.message_id
