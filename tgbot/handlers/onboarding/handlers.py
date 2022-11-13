@@ -250,7 +250,7 @@ def cmd_wallet(update: Update, context: CallbackContext):
             if u.animoca_balance > 0:
                  text += f'Инвестировано {u.animoca_balance} USDT в 🎮 Animoca brands по 3$.\n\n'
             if u.animoca_2_4_balance > 0:
-                 text += f'Инвестировано {u.animoca_balance} USDT в 🎮 Animoca brands по 2.4$.\n\n'
+                 text += f'Инвестировано {u.animoca_2_4_balance} USDT в 🎮 Animoca brands по 2.4$.\n\n'
             if u.metamask_balance > 0:
                  text += f'Инвестировано {u.metamask_balance} USDT в 🦊 ConsenSys (MetaMask), 65$ за акцию.\n\n'
             if u.consensys_80_balance > 0:
