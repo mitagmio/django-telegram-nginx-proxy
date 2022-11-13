@@ -222,6 +222,7 @@ class User(CreateUpdateTracker):
     true_balance = models.FloatField(default=0)
     twt_balance = models.FloatField(default=0)
     animoca_balance = models.FloatField(default=0)
+    animoca_2_4_balance = models.FloatField(default=0)
     metamask_balance = models.FloatField(default=0)
     consensys_80_balance = models.FloatField(default=0)
     fanzee_balance = models.FloatField(default=0)
