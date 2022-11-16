@@ -112,6 +112,7 @@ celerybeat.pid
 .env_db
 .env_letsencrypt
 .env_web
+.env_web_app
 .venv
 env/
 venv/

@@ -273,5 +273,18 @@ host    all             all             127.0.0.1/32            md5
 ```
 Эту папку сохранить для переноса на другой сервер.
 
+Для app-frontend
+```
+    # volumes:
+    #   - ./dtb/static:/static
+    #   - ./dtb/media:/media
+    # command: bash -c "rm -rf /static/js && rm -rf /static/css && rm -rf /static/media && cp -R /usr/share/nginx/html/static /"
+```
+Комментируем эти строки после первого билда или повторного билда.
+Когда делаем ребилж нужно раскоментировать, чтоб static файлы обновились в Основном NGINX.
+Ребилд
+```
+docker-compose build --no-cache app-frontend
+```
 
 ----

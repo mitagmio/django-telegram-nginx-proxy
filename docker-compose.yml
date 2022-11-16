@@ -1,6 +1,23 @@
 version: "3.8"
 
 services:
+  app-frontend:
+    container_name: app-frontend
+    build: app_frontend
+    restart: always
+    tty: true
+    ports:
+      - 8001:80
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "100"
+    env_file:
+      - ./.env_web_app
+    # volumes:
+    #   - ./dtb/static:/static
+    #   - ./dtb/media:/media
+    # command: bash -c "rm -rf /static/js && rm -rf /static/css && rm -rf /static/media && cp -R /usr/share/nginx/html/static /"
   web:
     build: .
     container_name: dtb_django
