@@ -219,11 +219,11 @@ def cmd_menu(update: Update, context: CallbackContext):
     # помечаем состояние пользователя.
     u.state = static_state.S_MENU
     metamask = False
-    selected = False
+    selected = True
     if u.marker is not None and 'metamask' in u.marker:
         metamask = True
-    if u.marker is not None and 'selected' in u.marker:
-        selected = True
+    # if u.marker is not None and 'selected' in u.marker:
+    #     selected = True
     id = context.bot.send_message(
         message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin, metamask, selected), parse_mode="HTML")
     u.message_id = id.message_id
@@ -443,16 +443,17 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 # selected
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
-    if u.marker is not None and ('selected' in u.marker or 'first_month' in u.marker):
-        pass
-    else:
-        return command_start(update, context)
+    # if u.marker is not None and ('selected' in u.marker or 'first_month' in u.marker):
+    #     pass
+    # else:
+    #     return command_start(update, context)
     message = get_message_bot(update)
     timestamp = int(datetime.datetime.today().timestamp())
-    if timestamp > 1662068400 and u.bonus_programm != 'first_month':
-        reply_markup = make_keyboard_for_cmd_selected_90()
-    else:
-        reply_markup = make_keyboard_for_cmd_selected() 
+    # if timestamp > 1662068400 and u.bonus_programm != 'first_month':
+    #     reply_markup = make_keyboard_for_cmd_selected_90()
+    # else:
+    #     reply_markup = make_keyboard_for_cmd_selected()
+    reply_markup = make_keyboard_for_cmd_selected_120() 
     if u.execute_selected_time > timestamp:
         execute_selected_time = u.execute_selected_time
         time_string_format = '‼️ Доступ заканчивается: ' + str(datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M'))
@@ -522,25 +523,25 @@ def buy_selected(update: Update, context: CallbackContext):
     del_mes(update, context, True)
 
 
-def buy_selected_90(update: Update, context: CallbackContext):
+def buy_selected_120(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
     message = get_message_bot(update)
 
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
         price = 400
-        if u.bonus_programm == 'first_month':
-            price = 300
+        # if u.bonus_programm == 'first_month':
+        #     price = 300
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= price
             if timestamp < u.execute_selected_time:
-                u.execute_selected_time += 60 * 60 * 24 * 90
+                u.execute_selected_time += 60 * 60 * 24 * 120
                 execute_selected_time = u.execute_selected_time
                 time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
                 text = static_text.BUY_SELECTED_TOP_UP.format(end_date='‼️ Доступ заканчивается: ' + str(time_string_format))
             else:
-                execute_selected_time = timestamp + 60 * 60 * 24 * 90
+                execute_selected_time = timestamp + 60 * 60 * 24 * 120
                 time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
                 u.execute_selected_time = execute_selected_time
                 # link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=execute_selected_time, member_limit=1).invite_link
@@ -704,7 +705,7 @@ Menu_Dict = {
     'Селектед': cmd_selected,
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
-    'Купить_Селектед_90': buy_selected_90,
+    'Купить_Селектед_120': buy_selected_120,
     'Не_напоминать': not_remind,
     'Администрирование': cmd_admin,
     'Пополнить_пользователю': cmd_top_up_user_admin,
