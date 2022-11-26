@@ -573,6 +573,68 @@ def send_selected_chat_manual() -> None:
             
     logger.info("Selected users remind was completed!")
 
+@app.task(ignore_result=True)
+def send_selected_BlackFriday_manual() -> None:
+    """ BlackFriday пользователям из selected """
+    logger.info("Starting send BlackFriday Selected ")
+    timestamp = int(datetime.today().timestamp())
+    logger.info(
+        f"timestamp {int(timestamp)}")
+    try:
+        #channel_id = -1001695923729
+        chat_id=-1001796561677
+        #admin_ids = _get_admins(chat_id=channel_id)
+        # first_month = True and execute_selected_time = 0 and execute_bonus_time = 0
+        Users = User.objects.filter(first_month=True).filter(execute_selected_time=0).filter(execute_selected_time=0)#.exclude(user_id__in=admin_ids)
+
+        logger.info(
+             f"Users len{len(Users)}, data {Users}")
+    except Exception as e:
+        Users = dict()
+        admin_ids = []
+        logger.info(
+            f"Users {len(Users)}, reason: {e}")
+    if len(Users) > 0:
+        bts = [
+            [
+                {'text': '💸 Продлить доступ', 'callback_data': 'Купить_Селектед'}
+            ],
+            [
+                {'text':'⏮ В начало', 'callback_data':'Старт'},
+                {'text':'⏪ Назад', 'callback_data':'Меню'}
+            ]
+        ]
+        for u in Users:
+            # if u.remind == True:
+            broadcast_message(
+                user_ids=[u.user_id],
+                text='''Добрый день. Вы были в числе первых, кто поверил в наш новый продукт SELECTED - за что вам большое спасибо.
+
+Дайте нам второй шанс! Мы предлагаем вам снова войти в сообщество по вашей первоначальной цене 100$/30 дней. 
+
+🟪Мы уже разобрали 15 проектов в долгосрочный портфель.
+🟪Запустили целое обучение по DeFi.
+🟪Открыли чат с Костевич и членами сообщества.
+
+Если есть вопросы, задавайте их в @Kostevich_selected_helpbot
+
+Спасибо.
+
+🟢Чтобы воспользоваться этим предложением (<b>действует два дня в честь Чёрной Пятницы</b>), нажмите кнопку "💸 Продлить доступ".\n\nСпасибо.''',
+                entities = None,
+                reply_markup = bts, #Optional[List[List[Dict]]]
+                sleep_between = 0.4,
+                parse_mode=telegram.ParseMode.HTML,
+            )
+            try:
+                _del_message(u.user_id, u.message_id)
+            except:
+                pass
+            pass
+            time.sleep(1)
+            
+    logger.info("Selected users remind was completed!")
+
 # @app.task(ignore_result=True)
 # def send_invoice_selected_manual() -> None:
 #     """ Напоминаем пользователям из selected """
