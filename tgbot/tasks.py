@@ -306,7 +306,7 @@ def payment_multi() -> None:
                         if u.hot_balance_trx > 0 and u.hot_balance_trx < 20:
                             fee = float(20 - u.hot_balance_trx)
                     except Exception as e:
-                        print('Error Get balance TRX', e)
+                        print(f'Error Get balance TRX u.username: {u.username}, addr: {u.addr}', e)
                         fee = float(20)
         
                     if u.hot_balance_trx == 0:
