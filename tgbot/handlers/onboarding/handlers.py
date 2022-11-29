@@ -219,11 +219,11 @@ def cmd_menu(update: Update, context: CallbackContext):
     # помечаем состояние пользователя.
     u.state = static_state.S_MENU
     metamask = False
-    selected = True
+    selected = False
     if u.marker is not None and 'metamask' in u.marker:
         metamask = True
-    # if u.marker is not None and 'selected' in u.marker:
-    #     selected = True
+    if u.marker is not None and 'selected' in u.marker:
+        selected = True
     id = context.bot.send_message(
         message.chat.id, static_text.MENU, reply_markup=make_keyboard_for_cmd_menu(u.is_admin, metamask, selected), parse_mode="HTML")
     u.message_id = id.message_id
