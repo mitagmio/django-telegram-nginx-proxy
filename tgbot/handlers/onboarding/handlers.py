@@ -532,7 +532,7 @@ def buy_selected_120(update: Update, context: CallbackContext):
         price = 400
         # if u.bonus_programm == 'first_month':
         #     price = 300
-        if 'minus_50' in u.bonus_programm:
+        if u.bonus_programm != None and u.bonus_programm != '' and 'minus_50' in u.bonus_programm:
             price = 350
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
