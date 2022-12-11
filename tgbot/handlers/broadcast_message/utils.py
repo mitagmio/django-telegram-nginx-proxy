@@ -110,18 +110,21 @@ def _get_admins(
             success.append(a.user.id)
     return success
 
-def _get_invite_chat(
+def _get_invite_selected(
     chat_id: Union[str, int],
+    channel_id: Union[str, int],
     tg_token: str = TELEGRAM_TOKEN,
-) -> str:
+) -> tuple:
     bot = telegram.Bot(tg_token)
     try:
         timestamp = time.time()
         link_chat = bot.create_chat_invite_link(chat_id=chat_id, expire_date=timestamp + 60 * 60 * 24 * 3, member_limit=1).invite_link
+        link_channel = bot.create_chat_invite_link(chat_id=channel_id, expire_date=timestamp + 60 * 60 * 24 * 3, member_limit=1).invite_link
     except telegram.error.Unauthorized:
         print(f"Can't get admins from {chat_id}")
         link_chat = ''
-    return link_chat
+        link_channel = ''
+    return link_chat, link_channel
 
 def _kick_member(
     chat_id: Union[str, int],

@@ -14,7 +14,7 @@ from dtb.celery import app
 from celery.utils.log import get_task_logger
 from dtb.settings import TELEGRAM_LOGS_CHAT_ID, TRON_TRC20
 from tgbot.handlers.broadcast_message.utils import _send_message, _del_message, _kick_member,  \
-    _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins, _get_invite_chat
+    _from_celery_entities_to_entities, _from_celery_markup_to_markup, _get_admins, _get_invite_selected
 
 from tronpy import Tron
 from tronpy.keys import PrivateKey
@@ -543,10 +543,78 @@ def send_selected_chat_manual() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
-        #channel_id = -1001695923729
+        channel_id = -1001695923729
         chat_id=-1001796561677
         #admin_ids = _get_admins(chat_id=channel_id)
-        Users = User.objects.filter(execute_selected_time__gt=0)#.exclude(user_id__in=admin_ids)
+        Users = User.objects.filter(username__in=['Alex_Generalov',
+'nooooooooooooooooooooname',
+'AlexeyANikolaev',
+'AlbinaShai',
+'Anastasiya Sinkevich',
+'stayler777',
+'LHHW8',
+'EtoBoris',
+'Vadim_20021984',
+'lorcin',
+'v_liberated',
+'stetvik',
+'Alfreed666',
+'x11707',
+'DenkaAlkmaar',
+'DanCento',
+'densli',
+'Дмитрий',
+'Hempoff',
+'Дмитрий',
+'evethetrader',
+'sawadikrapp',
+'Sheixan',
+'Kateryna_t_r',
+'Telegra_m1234',
+'Phuket_Paradise',
+'LK_008',
+'Wowow2020',
+'MaxHatskyi',
+'MarkVasilyev',
+'dives20',
+'Natali_Mirs',
+'Natalika_sa',
+'Oleg_897',
+'Ol_poema',
+'polinakulikova_pro',
+'r_shvalikovskyi',
+'VSvetlanaN25',
+'Sergii',
+'stasisax',
+'Стелла',
+'tatatitatata153',
+'aVeaVe1',
+'SJet22m3',
+'alvas0606',
+'Deusik',
+'Annakosh7',
+'Anna_Grishina88',
+'GurovArt',
+'ol32167',
+'Borrso',
+'DanVM',
+'r38danila',
+'Den1590',
+'profin_ev',
+'JELENA BAKALEYSHIK',
+'PerlovEvgen',
+'mkaurov',
+'NarikEnyrbaev',
+'ol32167',
+'staer74',
+'Cherkizok',
+'Stepanov_SV',
+'SergeyBeGood',
+'nasa_usa',
+'VvictorE',
+'viktotija0',
+'Yulia_Picanini',
+'YL1000'])#.exclude(user_id__in=admin_ids)
 
         logger.info(
              f"Users len{len(Users)}, data {Users}")
@@ -558,12 +626,13 @@ def send_selected_chat_manual() -> None:
     if len(Users) > 0:
         for u in Users:
             # if u.remind == True:
-                link_chat = _get_invite_chat(chat_id=chat_id)
+                link_chat, link_channel = _get_invite_selected(chat_id=chat_id, channel_id=channel_id)
                 print('username', u.username)
+                print('link_channel', link_channel)
                 print('link_chat', link_chat)
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text=f'Доброе день.\n\nПриглашаем Вас в SELECTED chat.\nСсылка: {link_chat}".\n\nСпасибо.',
+                    text=f'Доброе день.\n\nПриглашаем Вас в SELECTED.\nChannel ссылка: {link_channel}\nChat ссылка: {link_chat}\n\nСпасибо.',
                     entities = None,
                     reply_markup = None, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
