@@ -546,21 +546,7 @@ def send_selected_chat_manual() -> None:
         channel_id = -1001695923729
         chat_id=-1001796561677
         #admin_ids = _get_admins(chat_id=channel_id)
-        Users = User.objects.filter(username__in=['Vadim_20021984',
-'PerlovEvgen',
-'YL1000',
-'V_liberated',
-'VSvetlanaN25',
-'AnastasiyaSinkevich',
-'nooooooooooooooooooooname',
-'V_liberated',
-'profin_ev',
-'AnastasiyaSinkevich',
-'Wowow2020',
-'Macxone',
-'Leon66888',
-'NataliKa_sa',
-'Hempoff'])#.exclude(user_id__in=admin_ids)
+        Users = User.objects.filter(username__in=['Alex_Generalov'])#.exclude(user_id__in=admin_ids)
 
         logger.info(
              f"Users len{len(Users)}, data {Users}")
