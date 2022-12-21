@@ -718,9 +718,13 @@ def send_invoice_7_selected() -> None:
         ]
         for u in Users:
             if u.remind == True:
+                if "selected_clusters" in u.marker:
+                    text="Привет.\n\nСпасибо, что вступили к нам в сообщество после интенсива по кластерам. Две недели подходят к концу (через 7 дней), надеемся, что вам было полезно и вы захотите стать постоянным участником SELECTED.\n\nПродлить доступ или не напоминать?"
+                else:
+                    text="Через 7 дней закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?"
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="Через 7 дней закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
+                    text=text,
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
@@ -766,9 +770,13 @@ def send_invoice_3_selected() -> None:
         ]
         for u in Users:
             if u.remind == True:
+                if "selected_clusters" in u.marker:
+                    text="Привет.\n\nСпасибо, что вступили к нам в сообщество после интенсива по кластерам. Две недели подходят к концу (Через 3 дня), надеемся, что вам было полезно и вы захотите стать постоянным участником SELECTED.\n\nПродлить доступ или не напоминать?"
+                else:
+                    text="Через 3 дня закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?"
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="Через 3 дня закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
+                    text=text,
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
@@ -813,9 +821,13 @@ def send_invoice_1_selected() -> None:
         ]
         for u in Users:
             if u.remind == True:
+                if "selected_clusters" in u.marker:
+                    text="Привет.\n\nСпасибо, что вступили к нам в сообщество после интенсива по кластерам. Две недели подходят к концу (Через 1 день), надеемся, что вам было полезно и вы захотите стать постоянным участником SELECTED.\n\nПродлить доступ или не напоминать?"
+                else:
+                    text="Через 1 день закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?"
                 broadcast_message(
                     user_ids=[u.user_id],
-                    text="Через 1 днень закончится доступ в SELECTED.\n\nПродлить доступ или не напоминать?",
+                    text=text,
                     entities = None,
                     reply_markup = bts, #Optional[List[List[Dict]]]
                     sleep_between = 0.4,
