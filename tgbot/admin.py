@@ -23,8 +23,9 @@ class UserAdmin(admin.ModelAdmin):
         'user_id', 'username', 'first_name', 'last_name', 
         'language_code', 'deep_link',
         'created_at', 'updated_at', "is_blocked_bot",
+        "execute_selected_time", "marker",
     ]
-    list_filter = ["is_blocked_bot", ]
+    list_filter = ["is_blocked_bot", "execute_selected_time", "marker",]
     search_fields = ('username', 'user_id')
 
     actions = ['broadcast']
