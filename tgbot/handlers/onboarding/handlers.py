@@ -134,6 +134,29 @@ def check_username(update: Update, context: CallbackContext, text='\n'):
         return False
     return True
 
+# адрес TON
+def chenge_addr_ton(update: Update, context: CallbackContext, text='\n'):
+    message = get_message_bot(update)
+    u, _ = User.get_user_and_created(update, context)
+    u.state = static_state.S_ADDR_TON
+    id = context.bot.send_message(message.chat.id, static_text.NOT_ADDR_TON.format(
+        text=text, tgid=message.chat.id), reply_markup=make_keyboard_for_check_username())  # отправляет приветствие и кнопку
+    u.message_id = id.message_id
+    u.save()
+    del_mes(update, context, True)
+
+def s_addr_ton(update: Update, context: CallbackContext):
+    u = User.get_user(update, context)
+    message = get_message_bot(update)
+    addr_ton = message.text
+    try:
+        u.addr_ton = addr_ton
+        u.state = static_state.S_MENU
+        u.save()
+    except:
+        del_mes(update, context, True)
+    cmd_wallet(update, context)
+
 # Проверка на email
 def chenge_email(update: Update, context: CallbackContext, text='\n'):
     message = get_message_bot(update)
@@ -243,6 +266,8 @@ def cmd_wallet(update: Update, context: CallbackContext):
         if check_email(update, context):
             u.state = static_state.S_MENU
             text = ''
+            if u.addr_ton != "0":
+                 text += f'💎 TON Адрес:\n<code>{u.addr_ton}</code>\n\n'
             if u.true_balance > 0:
                  text += f'Инвестировано {u.true_balance} USDT в 🟪 TRUE.\n\n'
             if u.twt_balance > 0:
@@ -685,6 +710,7 @@ State_Dict = {
     static_state.S_MENU: del_mes,
     static_state.S_TOP_UP_WALLET_USDT: s_top_up_wallet_usdt,
     static_state.S_EMAIL: s_email,
+    static_state.S_ADDR_TON: s_addr_ton,
     # админка
     static_state.S_TOP_UP_WALLET_ADMIN: s_top_up_user_admin,
     static_state.S_TOP_UP_WALLET_USDT_ADMIN: top_up_user_wallet_admin,
@@ -697,6 +723,7 @@ Menu_Dict = {
     'Меню': cmd_menu,
     'Кошелек': cmd_wallet,
     'Почта': chenge_email,
+    'Адрес_TON': chenge_addr_ton,
     'Пополнить_Кошелек': cmd_top_up_multi_wallet_usdt,
     'Пополнить_Кошелек_TRC20':cmd_top_up_wallet_usdt,
     'Удалить_invoice':cmd_del_invoice_trc20,

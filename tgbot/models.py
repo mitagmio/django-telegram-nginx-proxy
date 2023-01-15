@@ -229,6 +229,7 @@ class User(CreateUpdateTracker):
     kraken_36_balance = models.FloatField(default=0)
     kraken_45_balance = models.FloatField(default=0)
     spacex_balance = models.FloatField(default=0)
+    addr_ton = models.CharField(max_length=256, default='0')
 
     def __str__(self):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'

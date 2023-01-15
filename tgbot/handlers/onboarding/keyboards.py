@@ -69,8 +69,11 @@ def make_keyboard_for_cmd_wallet() -> InlineKeyboardMarkup:
             text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек')#Пополнить_Кошелек_TRC20
         btn_change_email = InlineKeyboardButton(
             text='📨 Изменить почту', callback_data='Почта')
+        btn_change_addr_ton = InlineKeyboardButton(
+            text='💎 Изменить адрес TON', callback_data='Адрес_TON')
         buttons.append([btn_top_up_usdt])
         buttons.append([btn_change_email])
+        buttons.append([btn_change_addr_ton])
         buttons.append([btn_help, btn_back])
         return InlineKeyboardMarkup(buttons)
 
