@@ -555,20 +555,20 @@ def buy_selected_120(update: Update, context: CallbackContext):
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
         price = 400
-        # if u.bonus_programm == 'first_month':
-        #     price = 300
+        if u.bonus_programm == 'first_month':
+            price = 300
         if u.bonus_programm != None and u.bonus_programm != '' and 'minus_50' in u.bonus_programm:
             price = 350
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= price
             if timestamp < u.execute_selected_time:
-                u.execute_selected_time += 60 * 60 * 24 * 120
+                u.execute_selected_time += 60 * 60 * 24 * 90
                 execute_selected_time = u.execute_selected_time
                 time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
                 text = static_text.BUY_SELECTED_TOP_UP.format(end_date='‼️ Доступ заканчивается: ' + str(time_string_format))
             else:
-                execute_selected_time = timestamp + 60 * 60 * 24 * 120
+                execute_selected_time = timestamp + 60 * 60 * 24 * 90
                 time_string_format = datetime.datetime.fromtimestamp(execute_selected_time).strftime('%Y-%m-%d %H:%M')
                 u.execute_selected_time = execute_selected_time
                 link_chat = context.bot.create_chat_invite_link(chat_id=-1001796561677, expire_date=timestamp + 60 * 60 * 24, member_limit=1).invite_link
