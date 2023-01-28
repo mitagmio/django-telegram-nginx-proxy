@@ -506,8 +506,10 @@ def buy_selected(update: Update, context: CallbackContext):
         price = 100
         if timestamp > 1662068400:
             price = 200
-        if u.bonus_programm == 'first_month':
+        if u.bonus_programm != None and u.bonus_programm != '' and 'first_month' in u.bonus_programm:
             price = 100
+        if u.bonus_programm != None and u.bonus_programm != '' and 'selected_150' in u.bonus_programm:
+            price = 150
         if u.balance >= price:
             reply_markup = make_keyboard_for_cmd_help()
             u.balance -= price
@@ -555,7 +557,7 @@ def buy_selected_120(update: Update, context: CallbackContext):
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
         price = 400
-        if u.bonus_programm == 'first_month':
+        if u.bonus_programm != None and u.bonus_programm != '' and ('selected_150' in u.bonus_programm or 'first_month' in u.bonus_programm):
             price = 300
         if u.bonus_programm != None and u.bonus_programm != '' and 'minus_50' in u.bonus_programm:
             price = 350
