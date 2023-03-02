@@ -24,7 +24,7 @@ def make_keyboard_for_start() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text='👫💃 Реферальные ссылки', url="https://telegra.ph/Referalnye-ssylki-dlya-registracii-na-birzhe-04-15")
         ],
         [
-            InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot"),
+            InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/EKtech_bot"),
             InlineKeyboardButton(text='💰💰 Кошелек', callback_data='Кошелек')
         ]
     ]
@@ -39,7 +39,7 @@ def make_keyboard_for_check_username() -> InlineKeyboardMarkup:
 
 def make_keyboard_for_cmd_menu(adm, metamask = False, selected = False) -> InlineKeyboardMarkup:
         buttons = []
-        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
+        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/EKtech_bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
@@ -63,7 +63,7 @@ def make_keyboard_for_cmd_menu(adm, metamask = False, selected = False) -> Inlin
 
 def make_keyboard_for_cmd_wallet() -> InlineKeyboardMarkup:
         buttons = []
-        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
+        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/EKtech_bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_top_up_usdt = InlineKeyboardButton(
             text='💸 Пополнить баланс USDT TRC20', callback_data='Пополнить_Кошелек')#Пополнить_Кошелек_TRC20
@@ -79,7 +79,7 @@ def make_keyboard_for_cmd_wallet() -> InlineKeyboardMarkup:
 
 def make_keyboard_for_cmd_top_up_wallet_usdt() -> InlineKeyboardMarkup:
         buttons = []
-        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/KostevichSupport_Bot")
+        btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/EKtech_bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         buttons.append([btn_help, btn_back])
         return InlineKeyboardMarkup(buttons)
@@ -139,7 +139,7 @@ def make_keyboard_for_cmd_venture() -> InlineKeyboardMarkup:
     buttons = []
     buttons.append([InlineKeyboardButton(text='✅ True', callback_data='Меню'), InlineKeyboardButton(text='🐙 Kraken', callback_data='Меню')])
     buttons.append([InlineKeyboardButton(text='🦊 Metamask', callback_data='Меню'), InlineKeyboardButton(text='💰💰 Кошелек', callback_data='Кошелек')])
-    buttons.append([InlineKeyboardButton(text='Узнать больше о фонде', url='https://t.me/KostevichSupport_Bot')])
+    buttons.append([InlineKeyboardButton(text='Узнать больше о фонде', url='https://t.me/EKtech_bot')])
     btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Меню')
     btn_main = InlineKeyboardButton(text='⏮ В начало', callback_data='Старт')
     buttons.append([btn_main, btn_back])
