@@ -165,7 +165,7 @@ def make_keyboard_for_cmd_selected_120() -> InlineKeyboardMarkup:
     btn_top_up_usdt = InlineKeyboardButton(
             text='💸 Купить доступ на 30д', callback_data='Купить_Селектед')
     btn_top_up_usdt_90 = InlineKeyboardButton(
-            text='💸 Купить доступ на 120д', callback_data='Купить_Селектед_120')
+            text='💸 Купить доступ на 90д', callback_data='Купить_Селектед_120')
     btn_about_selected = InlineKeyboardButton(
             text='👩🏼‍🏫О SELECTED', url='https://telegra.ph/CHto-takoe-Kostevich-SELECTED-i-kakuyu-polzu-mozhno-iz-ehtogo-izvlech-02-027')
     buttons.append([btn_about_selected])
