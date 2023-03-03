@@ -493,6 +493,7 @@ def kick_selected() -> None:
                 admin_ids=admin_ids,
                 chat_id=channel_id
             )
+            u.execute_selected_time = 0
             if u.bonus_programm == 'first_month':
                u.execute_bonus_time = timestamp + (60 * 60 * 24 * 7)
             u.save()
@@ -506,7 +507,7 @@ def kick_selected_all() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
-        Users = User.objects.filter(execute_selected_time__lt=timestamp)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=0)
         channel_id = -1001695923729
         chat_id=-1001796561677
         admin_ids = _get_admins(chat_id=channel_id)
