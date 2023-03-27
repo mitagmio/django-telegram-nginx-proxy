@@ -735,7 +735,7 @@ Menu_Dict = {
     'Селектед': cmd_selected,
     'Селектед_soon':cmd_soon,
     'Купить_Селектед': buy_selected,
-    'Купить_Селектед_90': cmd_selected,
+    'Купить_Селектед_90': command_start,
     'Купить_Селектед_120': buy_selected_120,
     'Не_напоминать': not_remind,
     'Администрирование': cmd_admin,
