@@ -44,7 +44,7 @@ def make_keyboard_for_cmd_menu(adm, metamask = False, selected = False) -> Inlin
         btn_vc = InlineKeyboardButton(
             text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
         btn_academy = InlineKeyboardButton(
-            text='🧮📝 Kostevich Academy', callback_data='Академия')
+            text='🧮📝 Kostevich Academy', url="https://kostevich.online/trading") # callback_data='Академия'
         buttons.append([btn_vc])
         if selected:
             btn_selected = InlineKeyboardButton(text='🏵💸 Kostevich SELECTED', callback_data='Селектед')#Селектед_soon
@@ -188,6 +188,9 @@ def make_keyboard_for_cmd_admin(u) -> InlineKeyboardMarkup:
         text='⏮ В начало', callback_data='Старт')
     btn_top_up_admin = InlineKeyboardButton(
             text='Пополнить пользователю', callback_data='Пополнить_пользователю')
+    btn_academy = InlineKeyboardButton(
+        text='🧮📝 Kostevich Academy', callback_data='Академия')
+    buttons.append([btn_academy])
     if u.user_id == 352482305:
         buttons.append([btn_top_up_admin])
     buttons.append([btn_main, btn_back])
