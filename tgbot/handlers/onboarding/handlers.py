@@ -554,9 +554,9 @@ def buy_selected_120(update: Update, context: CallbackContext):
 
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
-        price = 300
+        price = 400
         if u.bonus_programm != None and u.bonus_programm != '' and 'minus_50' in u.bonus_programm:
-            price = 300
+            price = 350
         if u.bonus_programm != None and u.bonus_programm != '' and 'first_month' in u.bonus_programm:
             price = 300
         if u.balance >= price:
