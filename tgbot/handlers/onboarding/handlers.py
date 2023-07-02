@@ -468,10 +468,10 @@ def cmd_top_up_metamask(update: Update, context: CallbackContext):
 # selected
 def cmd_selected(update: Update, context: CallbackContext):
     u = User.get_user(update, context)
-    if u.marker is not None and ('selected' in u.marker or 'first_month' in u.marker):
-        pass
-    else:
-        return command_start(update, context)
+    # if u.marker is not None and ('selected' in u.marker or 'first_month' in u.marker):
+    #     pass
+    # else:
+    #     return command_start(update, context)
     message = get_message_bot(update)
     timestamp = int(datetime.datetime.today().timestamp())
     # if timestamp > 1662068400 and u.bonus_programm != 'first_month':
@@ -554,9 +554,9 @@ def buy_selected_120(update: Update, context: CallbackContext):
 
     if check_email(update, context):
         timestamp = int(datetime.datetime.today().timestamp())
-        price = 400
+        price = 300
         if u.bonus_programm != None and u.bonus_programm != '' and 'minus_50' in u.bonus_programm:
-            price = 350
+            price = 250
         if u.bonus_programm != None and u.bonus_programm != '' and 'first_month' in u.bonus_programm:
             price = 300
         if u.balance >= price:
