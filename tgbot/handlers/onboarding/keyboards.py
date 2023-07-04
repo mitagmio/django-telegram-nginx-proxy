@@ -42,7 +42,7 @@ def make_keyboard_for_cmd_menu(adm, metamask = False, selected = False) -> Inlin
         btn_help = InlineKeyboardButton(text='🆘 Помощь', url="https://t.me/EKtech_bot")
         btn_back = InlineKeyboardButton(text='⏪ Назад', callback_data='Старт')
         btn_vc = InlineKeyboardButton(
-            text='👨‍👧‍👦🧍‍♂️ Kostevich Venture', url='https://t.me/kostevich_VC')
+            text='👨‍👧‍👦🧍‍♂️ OM DAO Venture', url='https://t.me/kostevich_VC')
         btn_academy = InlineKeyboardButton(
             text='🧮📝 Kostevich Academy', url="https://kostevich.online") # callback_data='Академия'
         buttons.append([btn_vc])
