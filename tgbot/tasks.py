@@ -507,7 +507,7 @@ def kick_selected_all() -> None:
     logger.info(
         f"timestamp {int(timestamp)}")
     try:
-        Users = User.objects.filter(execute_selected_time__lt=timestamp, execute_selected_time__gt=0)
+        Users = User.objects.filter(execute_selected_time__lt=timestamp)
         channel_id = -1001695923729
         chat_id=-1001796561677
         admin_ids = _get_admins(chat_id=channel_id)
@@ -521,12 +521,13 @@ def kick_selected_all() -> None:
             f"Users {len(Users)}, reason: {e}")
     if len(Users) > 0:
         for u in Users:
+            time.sleep(1)
             _kick_member(
                 user_id=u.user_id,
                 admin_ids=admin_chat_ids,
                 chat_id=chat_id
             )
-            time.sleep(0.1)
+            time.sleep(1)
             _kick_member(
                 user_id=u.user_id,
                 admin_ids=admin_ids,
