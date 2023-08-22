@@ -7,7 +7,7 @@ FROM node:18.12.1 as build
 
 RUN apt update && apt install git
 
-RUN git clone https://github.com/mitagmio/om-dao.git
+RUN git clone https://github.com/OMDAOLLC/om-dao.git
 
 WORKDIR /om-dao
 
