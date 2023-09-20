@@ -55,7 +55,7 @@ services:
         max-file: "100"
   nginx-proxy:
     container_name: nginx-proxy
-    build: nginx
+    build: nginx-proxy
     restart: always
     tty: true
     ports:
